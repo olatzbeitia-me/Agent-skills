@@ -1,6 +1,6 @@
 # Growth and marketing agents
 
-Claude skills and small agents I build and use for growth, demand generation and marketing operations work. Each one turns a recurring piece of marketing work into a repeatable method: the judgement written down as instructions for Claude, and, where the work is numerical, tested code.
+I have built reussable agents for growth marketing, demand generation and marketing operations work. Each one turns a recurring piece of marketing work into a repeatable method: the judgement written down as instructions for Claude, and, where the work is numerical, tested code.
 
 ## The agents
 
