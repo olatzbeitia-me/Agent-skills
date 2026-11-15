@@ -1,7 +1,7 @@
 # Pluggable OpenAI-compatible /audio/speech TTS per beat -> audio/<beat>.wav (24 kHz mono, sped up by ATEMPO for ~1.2x pace)
 import json,sys,os,time,subprocess,urllib.request,concurrent.futures as cf
 K=os.environ['TTS_API_KEY']; MODEL=os.environ['TTS_MODEL']; VOICE=os.environ['TTS_VOICE']
-URL=os.environ.get('TTS_URL','https://openrouter.ai/api/v1/audio/speech'); ATEMPO=os.environ.get('ATEMPO','1.12')
+URL=os.environ.get('TTS_URL','https://openrouter.ai/api/v1/audio/speech'); ATEMPO=os.environ.get('ATEMPO','1.05')
 def synth(text,out):
     raw=out+'.pcm'
     body=json.dumps({"model":MODEL,"input":text,"voice":VOICE,"response_format":"pcm"}).encode()
@@ -25,7 +25,7 @@ for L in sys.argv[1:]:
         t=rest[0] if rest else txt
         if not (os.path.exists(out) and os.path.exists(out+'.txt') and open(out+'.txt').read()==t): jobs.append((t,out))
 print(len(jobs),'jobs',flush=True)
-with cf.ThreadPoolExecutor(int(os.environ.get('PAR','4'))) as ex:
+with cf.ThreadPoolExecutor(int(os.environ.get('PAR','6'))) as ex:
     for _ in ex.map(lambda j:synth(*j),jobs): pass
 import soundfile as sf
 for L in sys.argv[1:]:

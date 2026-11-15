@@ -1,6 +1,6 @@
 ---
 name: course-generator-handwritten
-description: Make narrated, hand-drawn whiteboard explainer videos and multi-lecture courses (black canvas, neon doodles drawn stroke by stroke, rough handwriting, ~1.2x voiceover) from a topic, a book/PDF, or research.
+description: Make narrated, hand-drawn whiteboard explainer videos and multi-lecture courses (black canvas, neon doodles drawn stroke by stroke, rough handwriting, ~1.2x voiceover) from a topic, a book/PDF, or research. Use when asked for an explainer video, a video lecture or course, or to turn a book, PDF or notes into lectures.
 ---
 
 # Course Generator: Handwritten Explainer Videos
@@ -35,11 +35,15 @@ Web-search every number, date and name. Prefer primary sources. Keep numbers fro
 
 ## Setup
 
+Work in `~/course`, a copy of this skill's `engine/` folder, so audio and videos stay out of the skills folder. Skip the copy if `~/course` already exists.
+
 ```bash
-cp -r engine/ ~/course && cd ~/course && npm i && cp .env.example .env   # fill TTS_* in .env (never commit it)
-pip install --break-system-packages soundfile
+cp -r <this skill's folder>/engine ~/course && cd ~/course   # e.g. ~/.claude/skills/course-generator-handwritten/engine
+npm i && npm run browsers        # Playwright + Chromium (needs Node 20+)
+pip install --break-system-packages soundfile numpy
+cp .env.example .env             # fill TTS_* in .env (never commit it)
 ```
-Playwright + Chromium and ffmpeg must exist (`require('playwright')`).
+ffmpeg must be installed. Lecture folders (`~/course/L02_Architecture/spec.js`) sit next to the scripts; the scripts can be called from any directory.
 
 **TTS is pluggable** (`tts.py`): any OpenAI-compatible `POST /audio/speech` that returns `response_format: "pcm"` (24 kHz s16le). Configure `TTS_URL`, `TTS_API_KEY`, `TTS_MODEL` and `TTS_VOICE` via env or `.env`. Pick a voice by testing 2–3 voices on one beat and choosing the most expressive one (highest pitch variance), not the first. Audio is cached per beat with a text sidecar, so only edited beats are re-voiced. Never hard-code keys or model names in committed files.
 
