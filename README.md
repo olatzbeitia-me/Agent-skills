@@ -6,7 +6,7 @@ Reusable skills for Claude Code.
 |---|---|
 | [`course-generator-handwritten`](course-generator-handwritten/SKILL.md) | Turns a topic, book/PDF or research into narrated, hand-drawn whiteboard explainer videos and courses. |
 
-## How The Agent works
+## How it works
 
 ```mermaid
 flowchart LR
@@ -29,18 +29,28 @@ flowchart LR
     classDef out fill:#000000,stroke:#8af07a,stroke-width:3px,color:#8af07a
 ```
 
-## Install th Agent
+## Install
 
-To install for a single project only, copy the skill into that project's `.claude/skills/` folder instead.
+```bash
+git clone https://github.com/olatzbeitia-me/Agent-skills.git
+mkdir -p ~/.claude/skills
+cp -r Agent-skills/course-generator-handwritten ~/.claude/skills/
+```
 
-Requirements: Node 18+, Python 3, ffmpeg, Playwright with Chromium, and an OpenAI-compatible text-to-speech API key.
+This makes the skill available in every project. To install it for a single project only, copy `course-generator-handwritten` into that project's `.claude/skills/` folder instead.
+
+Requirements: Node 20+, Python 3, ffmpeg, and an OpenAI-compatible text-to-speech API key. Playwright, Chromium, numpy and soundfile are installed in the next step.
 
 ## Configure
 
+The engine runs from its own working folder, `~/course`, so lecture audio and videos stay out of your skills folder.
+
 ```bash
-cd ~/.claude/skills/course-generator-handwritten/engine
-npm i
-cp .env.example .env   # set TTS_API_KEY, TTS_MODEL, TTS_VOICE (optionally TTS_URL)
+cp -r ~/.claude/skills/course-generator-handwritten/engine ~/course
+cd ~/course
+npm i && npm run browsers          # installs Playwright and Chromium
+python3 -m pip install soundfile numpy
+cp .env.example .env               # set TTS_API_KEY, TTS_MODEL, TTS_VOICE (optionally TTS_URL)
 ```
 
 `.env` is gitignored. Never commit keys.
@@ -60,3 +70,7 @@ Turn the attached PDF into a handwritten explainer course, one video per chapter
 ```
 
 Claude researches the topic, writes the lecture specs, voices them, checks the layouts and renders. You get numbered MP4s with subtitles.
+
+## Licence
+
+[MIT](LICENSE)

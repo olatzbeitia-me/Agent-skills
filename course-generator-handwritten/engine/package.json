@@ -1,1 +1,12 @@
-{ "name": "course-engine", "private": true, "dependencies": { "roughjs": "4.6.6", "@fontsource/reenie-beanie": "^5.0.0" } }
+{
+  "name": "course-engine",
+  "private": true,
+  "scripts": {
+    "browsers": "playwright install chromium"
+  },
+  "dependencies": {
+    "@fontsource/reenie-beanie": "^5.0.0",
+    "playwright": "^1.65.1",
+    "roughjs": "4.6.6"
+  }
+}
