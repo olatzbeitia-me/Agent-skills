@@ -29,13 +29,7 @@ flowchart LR
     classDef out fill:#000000,stroke:#8af07a,stroke-width:3px,color:#8af07a
 ```
 
-## Install
-
-```bash
-git clone https://github.com/yasir-khalid/agent-skills
-mkdir -p ~/.claude/skills
-cp -r agent-skills/course-generator-handwritten ~/.claude/skills/
-```
+## Install th Agent
 
 To install for a single project only, copy the skill into that project's `.claude/skills/` folder instead.
 
