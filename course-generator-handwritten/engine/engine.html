@@ -1,0 +1,139 @@
+
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:Hand;src:url(node_modules/@fontsource/reenie-beanie/files/reenie-beanie-latin-400-normal.woff2)}
+html,body{margin:0;background:#000;overflow:hidden}
+svg{display:block}
+text{font-family:Hand;}
+.print{font-family:Helvetica,Arial,sans-serif}
+</style>
+<script src="node_modules/roughjs/bundled/rough.js"></script>
+</head><body>
+<svg id="svg" width="1920" height="1080" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+<defs><filter id="wob" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="5"/></filter></defs><defs id="defs"></defs>
+<rect width="1920" height="1080" fill="#000"/>
+<g id="cam"><g id="world"></g></g>
+<g id="hud"></g>
+</svg>
+<script>
+const C={w:'#f1f1f1',g:'#8af07a',p:'#ff5ad9',v:'#8c7dff',o:'#ffa53d',y:'#f2ef6a',r:'#e8192c',gr:'#8a8a8a',b:'#6fb7ff'};
+const NS='http://www.w3.org/2000/svg';
+const gen=rough.generator();
+const GAP=0.2;   // silence between beats (pace!)
+let EL=[],CAM=[],DUR=0,BEATS={},uid=0,seedN=1,SPD=0.85,rs=11;const rnd=()=>{rs=(rs*16807)%2147483647;return rs/2147483647};
+let PARENT=null;const world=()=>PARENT||document.getElementById('world');
+function mk(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);(parent||world()).appendChild(e);return e}
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const ease=x=>x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2;
+function at(b,off=0){if(!(b in BEATS))throw 'beat '+b;return BEATS[b].s+off*BEATS[b].k}
+function af(b,f){return BEATS[b].s+BEATS[b].d*f}
+function T(x){return Array.isArray(x)?(x[2]==='f'?af(x[0],x[1]):at(x[0],x[1]||0)):x}
+function addPaths(ds,o){
+  const g=mk('g',{filter:'url(#wob)'});const items=[];
+  for(const d of ds){const p=mk('path',{d,fill:'none',stroke:C[o.c]||o.c||C.w,'stroke-width':(o.sw||3.2)*0.82,'stroke-linecap':'round','stroke-linejoin':'round'},g);items.push(p)}
+  const lens=items.map(p=>p.getTotalLength()||1);const tot=lens.reduce((a,b)=>a+b,0);
+  items.forEach((p,i)=>{p.style.strokeDasharray=lens[i]+' '+(lens[i]+2)});
+  const t0=T(o.t);const dur=(o.dur||clamp(tot/1500,.25,1.4))*SPD;
+  EL.push({kind:'path',g,items,lens,tot,t0,dur,o});return g;
+}
+function R(o){return Object.assign({roughness:Math.max(1.4,(o.rough??0.9)*1.7),bowing:o.bow??1.6,maxRandomnessOffset:2.5,disableMultiStroke:true,seed:(seedN++),preserveVertices:true},o.opts||{})}
+function rpaths(d){return gen.toPaths(d).map(x=>x.d)}
+const sh=(t,d)=>Array.isArray(t)?[t[0],(t[1]||0)+d]:t+d;
+const S={
+ line(x1,y1,x2,y2,o){return addPaths(rpaths(gen.line(x1,y1,x2,y2,R(o))),o)},
+ rect(x,y,w,h,o){return addPaths(rpaths(gen.rectangle(x,y,w,h,R(o))),o)},
+ ell(cx,cy,w,h,o){return addPaths(rpaths(gen.ellipse(cx,cy,w,h,R(Object.assign({rough:1.2},o)))),o)},
+ path(d,o){return addPaths(o.raw?[d]:rpaths(gen.path(d,R(o))),o)},
+ curve(pts,o){return addPaths(rpaths(gen.curve(pts,R(o))),o)},
+ arrow(x1,y1,x2,y2,o={}){
+   const bend=o.bend||0;const mx=(x1+x2)/2,my=(y1+y2)/2;const dx=x2-x1,dy=y2-y1;const L=Math.hypot(dx,dy)||1;
+   const cx=mx-dy/L*bend,cy=my+dx/L*bend;
+   const shaft=`M${x1} ${y1} Q${cx} ${cy} ${x2} ${y2}`;
+   const a=Math.atan2(y2-cy,x2-cx);const hl=o.head||18;
+   const h=`M${x2-hl*Math.cos(a-0.5)} ${y2-hl*Math.sin(a-0.5)} L${x2} ${y2} L${x2-hl*Math.cos(a+0.5)} ${y2-hl*Math.sin(a+0.5)}`;
+   return addPaths([shaft,h],o);
+ },
+ text(x,y,str,o={}){
+   const g=mk('g',{});const id='c'+(uid++);
+   const cp=mk('clipPath',{id},document.getElementById('defs'));const cr=mk('rect',{x:-9999,y:-9999,width:0,height:0},cp);
+   const fs=(o.size||40)*1.65;const col=C[o.c]||o.c||C.w;
+   const t=mk('text',{x,y,fill:col,stroke:col,'stroke-width':0.7,'font-size':fs,'text-anchor':o.anchor||'start','clip-path':`url(#${id})`},g);
+   if(o.rot)g.setAttribute('transform',`rotate(${o.rot} ${x} ${y})`);
+   for(const ch of str.replace(/'/g,'\u2019')){const sp=mk('tspan',{},t);sp.textContent=ch;sp.setAttribute('dy',((rnd()-.5)*3.5).toFixed(1));sp.setAttribute('rotate',((rnd()-.5)*7).toFixed(1));sp.setAttribute('font-size',(fs*(0.9+rnd()*.18)).toFixed(1))}
+   const t0=T(o.t);const dur=(o.dur||clamp(str.length*0.05,.35,2.2))*SPD;
+   EL.push({kind:'text',g,t,cr,t0,dur,o});return g;
+ },
+ pointer(x,y,ang,o){ // filled red arrow; TIP at (x,y); ang = direction it points (0=right,180=left,90=down); body trails opposite
+   const g=mk('g',{});const s=o.s||1;
+   mk('path',{d:'M0 0 L-46 -34 L-40 -14 L-150 -18 L-150 18 L-40 14 L-46 34 Z',fill:C.r,transform:`scale(${s})`},g);
+   EL.push({kind:'pointer',g,x,y,ang,t0:T(o.t),t1:o.until?T(o.until):1e9,o});return g;
+ },
+ card(x,y,w,h,o){ // printed white card (screenshot look); add S.ptext/S.prect children with parent=card
+   const g=mk('g',{});mk('rect',{x,y,width:w,height:h,fill:'#fbfbf8',rx:4},g);
+   EL.push({kind:'fade',g,t0:T(o.t),dur:o.dur||.25,o});return g;
+ },
+ ptext(x,y,str,o,parent){const t=mk('text',{x,y,fill:o.c||'#222','font-size':o.size||22,'text-anchor':o.anchor||'start','font-weight':o.weight||400,class:'print'},parent);t.textContent=str;return t},
+ prect(x,y,w,h,fill,parent){return mk('rect',{x,y,width:w,height:h,fill},parent)},
+ dim(g,t,to=.3){EL.push({kind:'dim',g,t0:T(t),to})},
+ cam(t,x,y,z,dur=1.2){CAM.push({t:T(t),x,y,z,dur})},   // centre (x,y) in world coords, zoom z
+ group(fn){const g=mk('g',{});const prev=PARENT;PARENT=g;fn();PARENT=prev;return g},
+ dot(x,y,r,o){const g=mk('g',{});mk('circle',{cx:x,cy:y,r,fill:C[o.c]||o.c||C.v},g);EL.push({kind:'pop',g,t0:T(o.t),dur:.18,o});return g},
+ // ---- icons
+ person(x,y,o){const s=o.s||1;S.ell(x,y-34*s,26*s,28*s,Object.assign({},o,{rough:.6}));
+   return S.path(`M${x-22*s} ${y+18*s} C${x-22*s} ${y-12*s} ${x-12*s} ${y-16*s} ${x} ${y-16*s} C${x+12*s} ${y-16*s} ${x+22*s} ${y-12*s} ${x+22*s} ${y+18*s}`,Object.assign({rough:.5},o,{t:sh(o.t,.15)}))},
+ crowd(x,y,n,o){for(let i=0;i<n;i++)S.person(x+i*44*(o.s||1)+(i%2?0:4),y+(i%3)*6,Object.assign({},o,{t:sh(o.t,i*.08),dur:.25}))},
+ book(x,y,o){const s=o.s||1;
+   S.path(`M${x} ${y-60*s} C${x-50*s} ${y-80*s} ${x-110*s} ${y-75*s} ${x-150*s} ${y-60*s} L${x-150*s} ${y+70*s} C${x-110*s} ${y+55*s} ${x-50*s} ${y+55*s} ${x} ${y+75*s} Z`,o);
+   S.path(`M${x} ${y-60*s} C${x+50*s} ${y-80*s} ${x+110*s} ${y-75*s} ${x+150*s} ${y-60*s} L${x+150*s} ${y+70*s} C${x+110*s} ${y+55*s} ${x+50*s} ${y+55*s} ${x} ${y+75*s} Z`,o);
+   for(let i=0;i<4;i++){S.line(x-125*s,y-35*s+i*25*s,x-25*s,y-38*s+i*25*s,{t:sh(o.t,.6+i*.07),c:'gr',sw:2,dur:.15});S.line(x+25*s,y-38*s+i*25*s,x+125*s,y-35*s+i*25*s,{t:sh(o.t,.9+i*.07),c:'gr',sw:2,dur:.15})}
+ },
+ bubble(x,y,w,h,o){ // speech bubble, top-left (x,y), tail bottom-left
+   return S.path(`M${x} ${y+h/2} C${x} ${y} ${x+w} ${y} ${x+w} ${y+h/2} C${x+w} ${y+h} ${x+w*.55} ${y+h} ${x+w*.4} ${y+h*.97} L${x+w*.2} ${y+h*1.3} L${x+w*.24} ${y+h*.93} C${x+w*.06} ${y+h*.85} ${x} ${y+h*.75} ${x} ${y+h/2}`,o)},
+ moon(x,y,o){return S.path(`M${x+20} ${y-60} C${x-50} ${y-60} ${x-70} ${y+40} ${x+10} ${y+60} C${x-30} ${y+30} ${x-30} ${y-30} ${x+20} ${y-60} Z`,o)},
+ underline(x1,y,x2,o){return S.path(`M${x1} ${y} C${(x1*2+x2)/3} ${y+4} ${(x1+2*x2)/3} ${y-3} ${x2} ${y+2}`,o)},
+ bracketL(x,y1,y2,o){return S.path(`M${x+14} ${y1} L${x} ${y1} L${x} ${y2} L${x+14} ${y2}`,o)},
+ bracketR(x,y1,y2,o){return S.path(`M${x-14} ${y1} L${x} ${y1} L${x} ${y2} L${x-14} ${y2}`,o)},
+ cross(x,y,s,o){S.line(x-s,y-s,x+s,y+s,o);return S.line(x+s,y-s,x-s,y+s,Object.assign({},o,{t:sh(o.t,.15)}))},
+ tick(x,y,s,o){return S.path(`M${x-s} ${y} L${x-s*.3} ${y+s*.7} L${x+s} ${y-s*.8}`,o)},
+ stack(x,y,w,rh,rows,o){ // the framework device. rows=[labels]. o.rowT=[time per row] or o.t (+0.35s per row)
+   const res=[];rows.forEach((lab,i)=>{const t=o.rowT?o.rowT[i]:sh(o.t,i*.35);
+     S.rect(x,y+i*rh,w,rh,{t,c:o.c||'w',sw:o.sw||3,dur:.4});
+     S.text(x+w/2,y+i*rh+rh*0.64,lab,{t:sh(t,.25),anchor:'middle',size:o.size||Math.round(rh*.42),c:o.tc||'w'});
+     res.push(y+i*rh+rh/2)});return res;
+ },
+ bar(x,baseY,w,h,label,o){ // hand-drawn bar + value label on top
+   S.rect(x,baseY-h,w,h,Object.assign({sw:3,dur:.5},o));
+   if(label)S.text(x+w/2,baseY-h-14,label,{t:sh(o.t,.5),c:o.c,size:34,anchor:'middle'});
+ },
+};
+function setTime(t){
+  for(const e of EL){
+    if(e.kind==='path'){const p=clamp((t-e.t0)/e.dur,0,1);
+      if(p<=0){e.g.style.display='none';continue}e.g.style.display='';
+      let acc=p*e.tot;e.items.forEach((it,i)=>{const L=e.lens[i];const v=clamp(acc,0,L);acc-=L;it.style.strokeDashoffset=(L-v);it.style.visibility=v>0?'visible':'hidden'});
+    }else if(e.kind==='text'){const p=clamp((t-e.t0)/e.dur,0,1);
+      if(p<=0){e.g.style.display='none';continue}e.g.style.display='';
+      if(!e.bb){e.bb=e.t.getBBox()}const b=e.bb;
+      e.cr.setAttribute('x',b.x-6);e.cr.setAttribute('y',b.y-20);e.cr.setAttribute('height',b.height+40);e.cr.setAttribute('width',(b.width+12)*p);
+    }else if(e.kind==='pointer'){const on=t>=e.t0&&t<e.t1;e.g.style.display=on?'':'none';if(on){const k=clamp((t-e.t0)/.18,0,1);const off=(1-ease(k))*60+Math.sin((t-e.t0)*5)*4;
+        const a=e.ang*Math.PI/180;e.g.setAttribute('transform',`translate(${e.x-Math.cos(a)*off} ${e.y-Math.sin(a)*off}) rotate(${e.ang})`)}}
+    else if(e.kind==='fade'||e.kind==='pop'){const p=clamp((t-e.t0)/e.dur,0,1);e.g.style.display=p<=0?'none':'';e.g.style.opacity=p;
+      if(e.kind==='pop'&&p>0){const bb=e.bb||(e.bb=e.g.getBBox());const s=.4+.6*p;const cx=bb.x+bb.width/2,cy=bb.y+bb.height/2;e.g.setAttribute('transform',`translate(${cx} ${cy}) scale(${s}) translate(${-cx} ${-cy})`)}}
+  }
+  for(const e of EL){if(e.kind==='dim'){const p=clamp((t-e.t0)/.4,0,1);e.g.style.opacity=1-(1-e.to)*p}}
+  let cx=960,cy=540,z=1;
+  for(const k of CAM){if(t<k.t)break;const p=ease(clamp((t-k.t)/k.dur,0,1));cx=cx+(k.x-cx)*p;cy=cy+(k.y-cy)*p;z=z+(k.z-z)*p}
+  document.getElementById('cam').setAttribute('transform',`translate(960 540) scale(${z}) translate(${-cx} ${-cy})`);
+  document.getElementById('svg').style.opacity=clamp(Math.min(t/.25,(DUR-t)/.25),0,1);
+}
+function loadScene(id,durs,ref){ // ref = optional older durations the offsets were written against (rescales offsets)
+  EL=[];CAM=[];uid=0;seedN=1;rs=11;PARENT=null;world().innerHTML='';document.getElementById('hud').innerHTML='';document.getElementById('defs').innerHTML='';
+  const sc=SCENES[id];let t=0.45;BEATS={};
+  for(const b of sc.beats){BEATS[b]={s:t,d:durs[b],k:ref&&ref[b]?durs[b]/ref[b]:1};t+=durs[b]+GAP}
+  DUR=t+0.5;sc.build(S);setTime(0);return {dur:DUR,beats:BEATS};
+}
+</script>
+<script src="dsl.js"></script>
+<script>document.write('<script src="'+location.hash.slice(1)+'/scenes.js"><\/script>')</script>
+</body></html>

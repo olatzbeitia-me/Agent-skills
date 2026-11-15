@@ -1,0 +1,9 @@
+.env
+node_modules/
+*/audio/
+*/parts/
+*/stills/
+*/qa/
+out/
+*.mp4
+*.wav

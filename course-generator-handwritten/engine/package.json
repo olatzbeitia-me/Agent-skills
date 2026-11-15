@@ -1,0 +1,1 @@
+{ "name": "course-engine", "private": true, "dependencies": { "roughjs": "4.6.6", "@fontsource/reenie-beanie": "^5.0.0" } }
