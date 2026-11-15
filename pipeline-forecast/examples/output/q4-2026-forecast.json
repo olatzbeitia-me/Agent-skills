@@ -1,0 +1,170 @@
+{
+  "quarter": "Q4 2026 (October to December)",
+  "currency": "\u00a3",
+  "target": 5600000.0,
+  "months_with_actuals": [
+    "2026-10"
+  ],
+  "months_remaining": [
+    "2026-11",
+    "2026-12"
+  ],
+  "lookback": [
+    "2026-04",
+    "2026-05",
+    "2026-06",
+    "2026-07",
+    "2026-08",
+    "2026-09"
+  ],
+  "pipeline_to_date": 1640500.0,
+  "planned_leads": 3900.0,
+  "scenarios": {
+    "low": {
+      "rates": {
+        "lead_to_mql": 0.33266666666666667,
+        "mql_to_sql": 0.33209535995722095,
+        "sql_to_opp": 0.3622766122766123,
+        "value_per_opp": 19000.0
+      },
+      "funnel": {
+        "leads": 3900.0,
+        "mqls": 1297.4,
+        "sqls": 430.8605200084985,
+        "opportunities": 156.09068955241835,
+        "pipeline_value": 2965723.1014959486
+      },
+      "remaining_value": 2965723.1014959486,
+      "total": 4606223.101495949,
+      "vs_target": 0.8225398395528479
+    },
+    "base": {
+      "rates": {
+        "lead_to_mql": 0.34,
+        "mql_to_sql": 0.36481954200749034,
+        "sql_to_opp": 0.368826192964124,
+        "value_per_opp": 19250.0
+      },
+      "funnel": {
+        "leads": 3900.0,
+        "mqls": 1326.0,
+        "sqls": 483.7507127019322,
+        "opportunities": 178.41993370953534,
+        "pipeline_value": 3434583.723908555
+      },
+      "remaining_value": 3434583.723908555,
+      "total": 5075083.723908555,
+      "vs_target": 0.9062649506979562
+    },
+    "high": {
+      "rates": {
+        "lead_to_mql": 0.34,
+        "mql_to_sql": 0.3901347642935799,
+        "sql_to_opp": 0.3707223919685727,
+        "value_per_opp": 19875.0
+      },
+      "funnel": {
+        "leads": 3900.0,
+        "mqls": 1326.0,
+        "sqls": 517.318697453287,
+        "opportunities": 191.78162492994892,
+        "pipeline_value": 3811659.7954827347
+      },
+      "remaining_value": 3811659.7954827347,
+      "total": 5452159.795482734,
+      "vs_target": 0.9735999634790596
+    }
+  },
+  "gap_to_target": 524916.2760914452,
+  "levers": [
+    {
+      "lever": "leads",
+      "label": "More leads in the remaining months",
+      "current": 3900.0,
+      "needed": 4496.047044218492,
+      "needed_per_month": 2248.023522109246,
+      "best_recent": 2300,
+      "change": 0.152832575440639,
+      "achievable": true
+    },
+    {
+      "lever": "lead_to_mql",
+      "label": "Better lead to marketing qualified lead rate",
+      "current": 0.34,
+      "needed": 0.3919630756498173,
+      "best_recent": 0.35,
+      "change": 0.152832575440639,
+      "achievable": false
+    },
+    {
+      "lever": "mql_to_sql",
+      "label": "Better marketing qualified to sales qualified rate",
+      "current": 0.36481954200749034,
+      "needed": 0.42057585218356947,
+      "best_recent": 0.4005602240896359,
+      "change": 0.152832575440639,
+      "achievable": false
+    },
+    {
+      "lever": "sql_to_opp",
+      "label": "Better sales qualified lead to opportunity rate",
+      "current": 0.368826192964124,
+      "needed": 0.42519484992479717,
+      "best_recent": 0.372,
+      "change": 0.152832575440639,
+      "achievable": false
+    },
+    {
+      "lever": "value_per_opp",
+      "label": "Higher average opportunity value",
+      "current": 19250.0,
+      "needed": 22192.027077232302,
+      "best_recent": 20000.0,
+      "change": 0.152832575440639,
+      "achievable": false
+    }
+  ],
+  "warnings": [
+    {
+      "metric": "mql_to_sql",
+      "earlier": 0.3934933898515563,
+      "recent": 0.32972423472505935,
+      "change": -0.1620590250589815,
+      "months": 3
+    }
+  ],
+  "series": {
+    "lead_to_mql": [
+      0.34,
+      0.3302222222222222,
+      0.35,
+      0.34,
+      0.3302197802197802,
+      0.34
+    ],
+    "mql_to_sql": [
+      0.4005602240896359,
+      0.39030955585464333,
+      0.38961038961038963,
+      0.3400286944045911,
+      0.32945091514143093,
+      0.319693094629156
+    ],
+    "sql_to_opp": [
+      0.36013986013986016,
+      0.3689655172413793,
+      0.35185185185185186,
+      0.37130801687763715,
+      0.3686868686868687,
+      0.372
+    ],
+    "value_per_opp": [
+      19000.0,
+      20000.0,
+      18600.0,
+      19500.0,
+      19000.0,
+      20000.0
+    ]
+  }
+}
