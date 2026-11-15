@@ -6,7 +6,7 @@ Reusable skills for Claude Code.
 |---|---|
 | [`course-generator-handwritten`](course-generator-handwritten/SKILL.md) | Turns a topic, book/PDF or research into narrated, hand-drawn whiteboard explainer videos and courses. |
 
-## How it works
+## How The Agent works
 
 ```mermaid
 flowchart LR
@@ -19,7 +19,7 @@ flowchart LR
     F -- yes --> G["Render<br/>Playwright + ffmpeg"]:::render
     G --> H["Course<br/>MP4 + subtitles"]:::out
 
-    classDef src fill:#6fb7ff,stroke:#1e3a5f,color:#000
+    classDef src fill:#6fb7ff,stroke:#1e3a5f,color:#0000
     classDef research fill:#8c7dff,stroke:#2e2470,color:#fff
     classDef spec fill:#f2ef6a,stroke:#6b6a10,color:#000
     classDef voice fill:#ff5ad9,stroke:#6b1059,color:#000
