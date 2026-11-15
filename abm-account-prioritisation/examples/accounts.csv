@@ -1,0 +1,31 @@
+account,industry,employees,region,crm,intent_score,web_visits_30d,engaged_contacts,attended_event,open_opportunity
+Lanternfield Bank,Banking,4800,North America,Salesforce,5,0,3,0,no
+Corvane Asset Management,Asset management,1500,UK and Ireland,Salesforce,15,2,0,0,no
+Mirelight Insurance,Insurance,350,North America,HubSpot,5,25,3,0,yes
+Quillstone Capital,Asset management,120,Benelux,Salesforce,85,2,3,0,no
+Brackenvale Software,Retail,,UK and Ireland,HubSpot,40,6,0,0,no
+Tidewren Analytics,Banking,1500,DACH,HubSpot,70,12,3,1,no
+Harrowgate Mutual,Insurance,1500,Nordics,HubSpot,40,0,3,0,no
+Pellucid Payments,Fintech,4800,Nordics,Salesforce,15,0,3,0,no
+Ardenmoor Partners,Professional services,800,Southern Europe,Salesforce,15,25,3,1,no
+Silverhythe Bank,Banking,4800,Nordics,HubSpot,92,0,0,1,no
+Kestrelbay Investments,Asset management,350,UK and Ireland,HubSpot,92,6,5,0,no
+Norvane Re,Insurance,120,North America,Salesforce,15,12,0,0,no
+Glimmerton Advisory,Professional services,1500,DACH,Zoho,92,0,0,0,no
+Oakhurst Ledger,Fintech,800,Southern Europe,Microsoft Dynamics,55,48,2,1,no
+Fenmarch Fintech,Fintech,9000,North America,Salesforce,25,2,0,0,no
+Velloway Bank,Banking,800,UK and Ireland,Salesforce,85,25,1,0,no
+Cindral Asset Management,Asset management,800,Nordics,HubSpot,5,12,5,1,no
+Thornwick Assurance,Insurance,9000,DACH,HubSpot,85,0,0,0,no
+Marrowfield Capital,Asset management,800,UK and Ireland,HubSpot,15,0,3,0,no
+Duskwater Payments,Fintech,4800,,Salesforce,40,25,2,0,no
+Ebbridge Wealth,Asset management,4800,Benelux,HubSpot,15,12,2,0,no
+Halcyra Insurance,Insurance,800,UK and Ireland,Salesforce,55,12,5,0,no
+Wrenhollow Bank,Banking,4800,UK and Ireland,HubSpot,5,25,1,1,no
+Stonecrop Consulting,Professional services,2400,DACH,Microsoft Dynamics,70,2,3,0,no
+Brightmere Fintech,Fintech,1500,Benelux,Microsoft Dynamics,40,2,2,0,no
+Calloway Fairbank,Professional services,15000,DACH,Salesforce,5,6,2,0,no
+Ostrel Investments,Asset management,4800,DACH,Pipedrive,70,6,0,0,no
+Peverell Mutual,Insurance,1500,DACH,HubSpot,5,12,5,0,no
+Rushgrove Capital,Asset management,350,Southern Europe,Microsoft Dynamics,40,12,0,0,no
+Yarrowby Bank,Banking,350,Southern Europe,Pipedrive,85,12,2,0,no

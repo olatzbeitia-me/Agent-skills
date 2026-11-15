@@ -1,0 +1,23 @@
+{
+  "fit": {
+    "industry": {"weight": 35, "label": "industry",
+                 "values": {"Banking": 1.0, "Asset management": 1.0, "Insurance": 0.8, "Fintech": 0.7, "Professional services": 0.4},
+                 "default": 0.1},
+    "employees": {"weight": 25, "label": "company size",
+                  "bands": [[0, 199, 0.2], [200, 999, 0.7], [1000, 9999, 1.0], [10000, null, 0.6]]},
+    "region": {"weight": 20, "label": "region",
+               "values": {"UK and Ireland": 1.0, "DACH": 0.9, "Benelux": 0.8, "Nordics": 0.7, "Southern Europe": 0.5},
+               "default": 0.2},
+    "crm": {"weight": 20, "label": "CRM fit",
+            "values": {"Salesforce": 1.0, "HubSpot": 0.8, "Microsoft Dynamics": 0.5}, "default": 0.3}
+  },
+  "engagement": {
+    "intent_score": {"weight": 40, "label": "intent data", "max": 100},
+    "web_visits_30d": {"weight": 25, "label": "website visits", "max": 40},
+    "engaged_contacts": {"weight": 25, "label": "engaged contacts", "max": 5},
+    "attended_event": {"weight": 10, "label": "event attendance", "max": 1}
+  },
+  "thresholds": {"fit": 70, "engagement": 50},
+  "pursue_now_capacity": 4,
+  "open_opportunity_column": "open_opportunity"
+}
