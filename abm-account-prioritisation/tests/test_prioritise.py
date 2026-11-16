@@ -1,4 +1,6 @@
+import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -60,6 +62,68 @@ class PrioritiseTests(unittest.TestCase):
         r = pr.prioritise(pr.load_accounts(ex / "accounts.csv"), pr.load_config(ex / "icp.json"))
         self.assertEqual(len(r["accounts"]), 30)
         self.assertLessEqual(r["counts"]["Pursue now"], 4)
+        # Velloway Bank reaches Pursue now on intent data and website visits, with 1 engaged contact
+        self.assertEqual([a["account"] for a in r["thin_buying_group"]], ["Velloway Bank"])
+
+
+BG_CFG = dict(CFG, buying_group={"column": "engaged_contacts", "min_engaged": 2})
+
+
+def acc_bg(name, engaged, **kwargs):
+    row = acc(name, **kwargs)
+    row["engaged_contacts"] = engaged
+    return row
+
+
+class BuyingGroupTests(unittest.TestCase):
+    def note_of(self, result, name):
+        return next(a["buying_group"] for a in result["accounts"] if a["account"] == name)
+
+    def test_single_person_engagement_is_flagged(self):
+        r = pr.prioritise([acc_bg("A", "1"), acc_bg("B", "3")], dict(BG_CFG))
+        self.assertIn("engagement from 1 person", self.note_of(r, "A"))
+        self.assertEqual(self.note_of(r, "B"), "")
+        self.assertEqual([a["account"] for a in r["thin_buying_group"]], ["A"])
+
+    def test_flag_does_not_change_tiers(self):
+        with_check = pr.prioritise([acc_bg("A", "0"), acc_bg("B", "0", intent="10")], dict(BG_CFG))
+        without = pr.prioritise([acc_bg("A", "0"), acc_bg("B", "0", intent="10")], dict(CFG))
+        self.assertEqual([(a["account"], a["tier"]) for a in with_check["accounts"]],
+                         [(a["account"], a["tier"]) for a in without["accounts"]])
+
+    def test_only_pursue_tiers_are_checked(self):
+        # B is Warm up and C is Check fit: thin engagement there is expected, not a warning
+        r = pr.prioritise([acc_bg("B", "0", intent="10"), acc_bg("C", "0", industry="Retail", intent="90")],
+                          dict(BG_CFG))
+        self.assertEqual(r["thin_buying_group"], [])
+
+    def test_over_capacity_accounts_are_checked_too(self):
+        cfg = dict(BG_CFG, pursue_now_capacity=1)
+        r = pr.prioritise([acc_bg("A", "4", intent="90"), acc_bg("B", "1", intent="80")], cfg)
+        self.assertEqual(r["accounts"][1]["tier"], "Pursue next (over capacity)")
+        self.assertIn("map the buying group", self.note_of(r, "B"))
+
+    def test_unknown_count_is_flagged_not_assumed(self):
+        r = pr.prioritise([acc_bg("A", "")], dict(BG_CFG))
+        self.assertIn("unknown", self.note_of(r, "A"))
+
+    def test_check_is_off_unless_configured(self):
+        r = pr.prioritise([acc_bg("A", "0")], dict(CFG, buying_group=None))
+        self.assertEqual(r["thin_buying_group"], [])
+        self.assertNotIn("Buying group check", pr.render_markdown(r, "t"))
+
+    def test_report_lists_flagged_accounts(self):
+        r = pr.prioritise([acc_bg("A", "1")], dict(BG_CFG))
+        report = pr.render_markdown(r, "t")
+        self.assertIn("## Buying group check", report)
+        self.assertIn("- **A** (Pursue now): engagement from 1 person", report)
+
+    def test_incomplete_rule_is_rejected(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "icp.json"
+            path.write_text(json.dumps(dict(CFG, buying_group={"column": "engaged_contacts"})), encoding="utf-8")
+            with self.assertRaises(SystemExit):
+                pr.load_config(path)
 
 
 if __name__ == "__main__":
