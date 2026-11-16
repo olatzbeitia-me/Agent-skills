@@ -13,6 +13,11 @@ event attendance). Putting the two scores side by side gives four tiers with dif
 Accounts with an open opportunity are kept out of prospecting tiers. The "Pursue now" tier is capped at
 sales capacity; the overflow is labelled so nobody pretends 40 accounts can get one-to-few attention.
 
+Optionally, a buying group check flags Pursue now and Pursue next accounts whose engagement comes from
+fewer people than the configured minimum. Business purchases are decided by groups, so interest from one
+person is a lead to map the buying group, not a sign the account is ready for a sales push. The check flags;
+it does not change tiers.
+
 Standard library only. Run:  python3 prioritise.py --accounts accounts.csv --config icp.json --out output/tiers
 """
 from __future__ import annotations
@@ -30,8 +35,10 @@ PLAYS = {
     "Pursue next (over capacity)": "Same profile as Pursue now, but beyond what sales can work properly this "
                                    "period. Keep them warm with targeted advertising and promote the strongest "
                                    "when a Pursue now account closes or stalls.",
-    "Warm up": "Right accounts, not yet interested. Marketing-led: targeted advertising to the buying group, "
-               "relevant content and event invitations. Hand to sales when engagement crosses the threshold.",
+    "Warm up": "Right accounts, not buying yet. Most accounts are out of the market at any one time, so this "
+               "is the long-running programme: steady advertising and content to the whole buying group so the "
+               "brand is familiar when they do enter the market. Hand to sales when engagement crosses the "
+               "threshold.",
     "Check fit": "Showing interest but outside the ideal profile. Qualify quickly (one call or a short "
                  "form) before spending on them; route to the standard inbound process if they are not a fit.",
     "Hold": "No proactive spend. Leave in general nurture and re-score next period.",
@@ -47,6 +54,10 @@ def load_config(path: Path) -> dict:
             raise SystemExit(f"{path}: missing '{key}'")
     cfg.setdefault("pursue_now_capacity", None)
     cfg.setdefault("open_opportunity_column", "open_opportunity")
+    cfg.setdefault("buying_group", None)
+    bg = cfg["buying_group"]
+    if bg is not None and ("column" not in bg or "min_engaged" not in bg):
+        raise SystemExit(f"{path}: 'buying_group' needs 'column' and 'min_engaged'")
     return cfg
 
 
@@ -129,8 +140,24 @@ def explain(fit_shares: dict, eng_shares: dict, cfg: dict) -> str:
     return "; ".join(bits)
 
 
+def buying_group_note(row: dict, rule: dict | None) -> str:
+    """Return a warning when engagement comes from fewer people than the agreed minimum, else ''."""
+    if not rule:
+        return ""
+    minimum = int(rule["min_engaged"])
+    engaged = number(row.get(rule["column"], ""))
+    if engaged is None:
+        return f"number of engaged people unknown; check before outreach (minimum {minimum})"
+    if engaged < minimum:
+        n = int(engaged)
+        people = "person" if n == 1 else "people"
+        return f"engagement from {n} {people}, below the minimum of {minimum}; map the buying group first"
+    return ""
+
+
 def prioritise(accounts: list[dict], cfg: dict) -> dict:
     t_fit, t_eng = cfg["thresholds"]["fit"], cfg["thresholds"]["engagement"]
+    bg_rule = cfg.get("buying_group")
     scored = []
     for row in accounts:
         issues: list[str] = []
@@ -148,7 +175,8 @@ def prioritise(accounts: list[dict], cfg: dict) -> dict:
             tier = "Hold"
         scored.append({"account": row["account"], "fit": round(fit, 1), "engagement": round(eng, 1),
                        "priority": round((fit + eng) / 2, 1), "tier": tier,
-                       "why": explain(fit_shares, eng_shares, cfg), "data_issues": "; ".join(issues)})
+                       "why": explain(fit_shares, eng_shares, cfg), "data_issues": "; ".join(issues),
+                       "buying_group": buying_group_note(row, bg_rule) if tier == "Pursue now" else ""})
 
     cap = cfg.get("pursue_now_capacity")
     pursue = sorted([a for a in scored if a["tier"] == "Pursue now"], key=lambda a: -a["priority"])
@@ -160,27 +188,47 @@ def prioritise(accounts: list[dict], cfg: dict) -> dict:
     scored.sort(key=lambda a: (order[a["tier"]], -a["priority"]))
     counts = {t: sum(1 for a in scored if a["tier"] == t) for t in TIERS}
     return {"accounts": scored, "counts": counts, "thresholds": cfg["thresholds"], "capacity": cap,
-            "issues": [a for a in scored if a["data_issues"]]}
+            "buying_group_rule": bg_rule,
+            "issues": [a for a in scored if a["data_issues"]],
+            "thin_buying_group": [a for a in scored if a["buying_group"]]}
 
 
 def render_markdown(r: dict, title: str) -> str:
     lines = [f"# {title}", "",
              f"{len(r['accounts'])} accounts scored. Fit threshold {r['thresholds']['fit']}, engagement threshold "
              f"{r['thresholds']['engagement']}" + (f", Pursue now capped at {r['capacity']} accounts for sales capacity."
-                                                   if r["capacity"] is not None else "."), "",
+                                                   if r["capacity"] is not None else ".")
+             + (f" Buying group check: at least {r['buying_group_rule']['min_engaged']} engaged people."
+                if r.get("buying_group_rule") else ""), "",
              "## Tiers", "", "| Tier | Accounts | Play |", "|---|---:|---|"]
     for t in TIERS:
         if r["counts"][t]:
             lines.append(f"| {t} | {r['counts'][t]} | {PLAYS[t]} |")
     lines.append("")
-    for t in ("Pursue now", "Pursue next (over capacity)", "Warm up", "Check fit"):
+
+    def tier_table(t: str) -> None:
         group = [a for a in r["accounts"] if a["tier"] == t]
         if not group:
-            continue
-        lines += [f"## {t}", "", "| Account | Fit | Engagement | Why |", "|---|---:|---:|---|"]
+            return
+        lines.extend([f"## {t}", "", "| Account | Fit | Engagement | Why |", "|---|---:|---:|---|"])
         for a in group:
             lines.append(f"| {a['account']} | {a['fit']:.0f} | {a['engagement']:.0f} | {a['why']} |")
         lines.append("")
+
+    tier_table("Pursue now")
+    tier_table("Pursue next (over capacity)")
+    if r.get("thin_buying_group"):
+        rule = r["buying_group_rule"]
+        lines += ["## Buying group check", "",
+                  f"Business purchases are decided by groups, not individuals. These accounts score as ready, but "
+                  f"the engagement comes from fewer than {rule['min_engaged']} people. Before sales outreach, "
+                  f"identify the other roles involved (for example budget holder, user, procurement) and widen "
+                  f"engagement to more of the group.", ""]
+        for a in r["thin_buying_group"]:
+            lines.append(f"- **{a['account']}** ({a['tier']}): {a['buying_group']}")
+        lines.append("")
+    tier_table("Warm up")
+    tier_table("Check fit")
     if r["issues"]:
         lines += ["## Data to fix", "",
                   "Missing values score zero, so these accounts may be ranked too low:", ""]
@@ -190,7 +238,9 @@ def render_markdown(r: dict, title: str) -> str:
     lines += ["## How to read this", "",
               "- Scores are relative to the weights in the configuration, not probabilities. Change the weights "
               "and the order changes; agree them with sales before acting on the list.",
-              "- Engagement decays. Re-score at least monthly, and promote or demote accounts on the new scores.", ""]
+              "- Engagement decays. Re-score at least monthly, and promote or demote accounts on the new scores.",
+              "- Most accounts are not buying at any one time, so a long Warm up list is normal. Judge that "
+              "programme over quarters, not by this month's pipeline.", ""]
     return "\n".join(lines)
 
 
@@ -207,7 +257,8 @@ def main() -> None:
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.with_suffix(".md").write_text(report, encoding="utf-8")
         with open(args.out.with_suffix(".csv"), "w", newline="", encoding="utf-8") as f:
-            w = csv.DictWriter(f, fieldnames=["account", "tier", "priority", "fit", "engagement", "why", "data_issues"])
+            w = csv.DictWriter(f, fieldnames=["account", "tier", "priority", "fit", "engagement", "why",
+                                              "buying_group", "data_issues"])
             w.writeheader()
             w.writerows(result["accounts"])
         print(f"Wrote {args.out.with_suffix('.md')} and {args.out.with_suffix('.csv')}")

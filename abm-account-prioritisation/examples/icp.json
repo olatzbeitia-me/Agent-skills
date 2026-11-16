@@ -19,5 +19,6 @@
   },
   "thresholds": {"fit": 70, "engagement": 50},
   "pursue_now_capacity": 4,
+  "buying_group": {"column": "engaged_contacts", "min_engaged": 2},
   "open_opportunity_column": "open_opportunity"
 }

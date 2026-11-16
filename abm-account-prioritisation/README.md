@@ -16,6 +16,7 @@ Most target account lists are too long to act on and ranked by gut feel. This ag
 | **Low fit** | Hold: no proactive spend | Check fit: qualify before investing |
 
 - **Capacity cap**: Pursue now is limited to what sales can work properly. The overflow is labelled "Pursue next" rather than quietly diluting attention.
+- **Buying group check**: business purchases involve many people, so a Pursue now account whose interest comes from a single contact is flagged. The next step there is mapping the rest of the buying group, not a sales call.
 - **Deals in progress** are kept out of prospecting and flagged for deal support instead.
 - **Data gaps** are listed, because a missing value scores zero and pushes a good account down the list.
 
@@ -29,10 +30,14 @@ Most target account lists are too long to act on and ranked by gut feel. This ag
 > | Kestrelbay Investments | 88 | 66 | fits on industry and region; engaged via engaged contacts and intent data |
 >
 > **Pursue next (over capacity):** Quillstone Capital: same profile, but beyond what sales can work this period.
+>
+> **Buying group check:** Velloway Bank: engagement from 1 person, below the minimum of 2; map the buying group first.
 
 ## How it works, in plain terms
 
 Fit is the shape of the key; engagement is whether the door is open right now. A perfect-fit account with no interest needs warming up, not a sales call. An interested account that does not fit needs a quick check, not a campaign. Only accounts where both are true get the expensive, personal treatment, and only as many as the team can actually give it to.
+
+Expect the Warm up tier to be the largest. Research from the Ehrenberg-Bass Institute shows why: where companies change supplier about every 5 years, only around 5% are in the market in any quarter, so most good-fit accounts are simply not buying yet. The evidence behind this and the buying group check is in [`references/buying-groups-and-timing.md`](references/buying-groups-and-timing.md).
 
 ## Run it
 
@@ -49,4 +54,5 @@ The scoring configuration is described in [`SKILL.md`](SKILL.md). With Claude Co
 
 - Scores are relative rankings under the weights you choose, not probabilities of buying. Agree the weights with sales before acting on the list.
 - Intent data varies by provider. Calibrate each signal's maximum to what "high" means for your business.
+- The buying group check counts engaged people. It cannot tell whether they hold the roles that decide the purchase; that needs a person to look.
 - All account names in `examples/` are fictional.

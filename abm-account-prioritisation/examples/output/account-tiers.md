@@ -1,6 +1,6 @@
 # Account prioritisation: European financial services (fictional sample)
 
-30 accounts scored. Fit threshold 70, engagement threshold 50, Pursue now capped at 4 accounts for sales capacity.
+30 accounts scored. Fit threshold 70, engagement threshold 50, Pursue now capped at 4 accounts for sales capacity. Buying group check: at least 2 engaged people.
 
 ## Tiers
 
@@ -8,7 +8,7 @@
 |---|---:|---|
 | Pursue now | 4 | Joint sales and marketing plan per account: map the buying group, personalised outreach from the account owner, tailored content or an invitation to a small event, and a weekly check on progress. |
 | Pursue next (over capacity) | 1 | Same profile as Pursue now, but beyond what sales can work properly this period. Keep them warm with targeted advertising and promote the strongest when a Pursue now account closes or stalls. |
-| Warm up | 15 | Right accounts, not yet interested. Marketing-led: targeted advertising to the buying group, relevant content and event invitations. Hand to sales when engagement crosses the threshold. |
+| Warm up | 15 | Right accounts, not buying yet. Most accounts are out of the market at any one time, so this is the long-running programme: steady advertising and content to the whole buying group so the brand is familiar when they do enter the market. Hand to sales when engagement crosses the threshold. |
 | Check fit | 2 | Showing interest but outside the ideal profile. Qualify quickly (one call or a short form) before spending on them; route to the standard inbound process if they are not a fit. |
 | Hold | 7 | No proactive spend. Leave in general nurture and re-score next period. |
 | In sales cycle | 1 | Already an open opportunity. Support the deal (content for the buying group, references, executive involvement) rather than prospecting it. |
@@ -27,6 +27,12 @@
 | Account | Fit | Engagement | Why |
 |---|---:|---:|---|
 | Quillstone Capital | 76 | 50 | fits on industry and CRM fit; weaker on company size; engaged via intent data and engaged contacts |
+
+## Buying group check
+
+Business purchases are decided by groups, not individuals. These accounts score as ready, but the engagement comes from fewer than 2 people. Before sales outreach, identify the other roles involved (for example budget holder, user, procurement) and widen engagement to more of the group.
+
+- **Velloway Bank** (Pursue now): engagement from 1 person, below the minimum of 2; map the buying group first
 
 ## Warm up
 
@@ -66,3 +72,4 @@ Missing values score zero, so these accounts may be ranked too low:
 
 - Scores are relative to the weights in the configuration, not probabilities. Change the weights and the order changes; agree them with sales before acting on the list.
 - Engagement decays. Re-score at least monthly, and promote or demote accounts on the new scores.
+- Most accounts are not buying at any one time, so a long Warm up list is normal. Judge that programme over quarters, not by this month's pipeline.
