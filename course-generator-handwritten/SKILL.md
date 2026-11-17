@@ -16,6 +16,7 @@ research → spec.js per lecture → build.sh (extract → TTS → scenes.js) �
 1. **Pace ≈ 1.2x, never faster.** API voices: trim silence, then `ATEMPO=1.05` (expressive voice) to `1.12` (slow voice). 0.2s gap between beats. 1.25x+ sounds rushed.
 2. **Handmade look.** Reenie Beanie font with per-letter jitter; rough.js lines (roughness ≥1.4) plus an SVG turbulence wobble. Only "printed" evidence cards (tables, real numbers) are clean sans-serif.
 3. **Black background, neon roles:** `w` main, `g` good/works, `p` problem/warning, `v` concept, `o` actions/analogies, `y` highlights/numbers, `b` secondary, `gr` citations/asides.
+4. **Show key words, say everything.** On screen: labels, key words, numbers and diagrams, never narration copied onto the screen. In `say`: every number, name, setting and highlighted row that appears on screen, so a viewer who cannot see loses nothing (this is the video's audio description).
 
 ## Teaching structure (every lecture)
 
@@ -23,7 +24,10 @@ research → spec.js per lecture → build.sh (extract → TTS → scenes.js) �
 2. **Framework (`LAYERS`, 3–7 items):** the spine. Each section shows a mini copy top-right with its layer bracketed.
 3. **Sections:** 1–3 beats each. One idea and one visual per beat. Name sources out loud and in grey on screen.
 4. **Intuition:** at least one `analogy` per section for anything abstract ("a smoke detector, not a fire brigade"). Gloss jargon in plain words immediately.
-5. **Recap and up next:** the framework, ticked lines, then the next lecture's title, so a course chains together.
+5. **Quick check (every course lecture; optional for a one-off explainer):** one beat before the recap asking 1 or 2 recall questions about the framework. Tell the viewer to pause and answer from memory; show no answers in this beat, because the recap reveals them. `section('S05_Check', null, 'y', [{ b: 'ck1', t: 'Quick check', say: "…", v: [['big', 'Name the 4 differences', 'y', 64]] }], 'Quick check')`: `null` shows the whole framework, nothing highlighted.
+6. **Recap and up next:** the framework, ticked lines, then the next lecture's title, so a course chains together.
+
+**Length:** 6 minutes of speech or less per lecture (about 950 words at the engine's pace). `extract.js` prints `LONG` above that; split at a section boundary into 2 lectures rather than speeding up the voice. Evidence and limits for the length guide, the quick check and rule 4: [references/learning-design.md](references/learning-design.md).
 
 Voice: a peer explaining over coffee. Short sentences, "So,", "And here's the thing.", "Remember the X?". Write numbers the way they should be spoken ("twenty twenty six", "one point seven seconds"). Avoid symbols in `say`.
 
@@ -92,7 +96,8 @@ Run QA on every lecture before rendering and **look at every sheet**. Fix:
 - labels overflowing boxes (the engine shrinks fonts, but long labels still need shortening);
 - a card highlight on the wrong row (count the header as row 0);
 - content past the frame;
-- an `at` word that doesn't exist (`WORDMISS` in the log).
+- an `at` word that doesn't exist (`WORDMISS` in the log);
+- anything on screen the narration never says (a number, a setting name, a highlighted row): say it or cut it.
 
 For many lectures, use a queue: a `READY` flag per directory, one render at a time, re-render when `scenes.js` is newer than the MP4. In the cloud, finished lectures take about 3–4 min each to render. Background jobs must be harness-tracked (not `nohup` on a VM that may sleep).
 

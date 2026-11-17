@@ -58,3 +58,15 @@ Turn the attached PDF into a handwritten explainer course, one video per chapter
 ```
 
 Claude researches the topic, writes the lecture specs, voices them, checks the layouts and renders. You get numbered MP4s with subtitles.
+
+## How the lectures are designed
+
+The teaching rules follow published research on learning from video and the World Wide Web Consortium's accessibility guidance: lectures of 6 minutes of speech or less, a quick recall question before each recap, and key words on screen with everything that matters said aloud, so the narration doubles as audio description. The evidence, its limits and the sources are in [references/learning-design.md](references/learning-design.md).
+
+## Tests
+
+The narration extractor, its spec checks and the lecture length warning are tested (Node must be installed):
+
+```bash
+python3 -m unittest discover -s course-generator-handwritten/tests
+```

@@ -40,7 +40,7 @@ section('S04_Fix', 2, 'g', [
   ] },
 ]);
 section('S05_Why', 3, 'o', [
-  { b: 'wh1', t: 'Why pay for it?', say: "Why pay that cost? Two reasons. Reproducible debugging and testing: when a bug appears, you can replay it exactly. And reinforcement learning, where the model that generates answers and the model that learns from them must agree, bit for bit. vLLM now offers this as a simple switch.", v: [
+  { b: 'wh1', t: 'Why pay for it?', say: "Why pay that cost? Two reasons. Reproducible debugging and testing: when a bug appears, you can replay it exactly. And reinforcement learning, where the model that generates answers and the model that learns from them must agree, bit for bit. vLLM now offers this as a simple switch: a setting called VLLM batch invariant, set to one.", v: [
     ['list', ['replay bugs exactly', 'reinforcement learning: generator and learner agree bit for bit'], 'o', { num: true, times: [['wh1', .15, 'f'], ['wh1', .45, 'f']] }],
     ['card', 'in vLLM', [['setting'], ['VLLM_BATCH_INVARIANT=1']], { w: 760 }, { at: 'switch' }],
   ] },
