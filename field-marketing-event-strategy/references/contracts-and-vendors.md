@@ -93,3 +93,4 @@ Adjust for the event's own deadlines.
 | 1 day after | Hot leads with account owners |
 | 2 days after | All leads routed |
 | 30, 60, 90 days | Pipeline reviews |
+| 6 and 12 months | Pipeline reviews for events whose job is new accounts |
