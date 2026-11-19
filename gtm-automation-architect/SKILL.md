@@ -73,6 +73,7 @@ Rules for agentic steps:
 - Use the cheapest capable model for classification and extraction; reserve the strongest model for customer-facing copy.
 - Give agents a step budget, a scoped set of tools, and an evaluator or confidence threshold. Low confidence routes to a human, not to the customer.
 - Any external send, or any overwrite of existing CRM data, needs human approval until the workflow has earned promotion (see phase 4).
+- Treat text from outside the company (form fields, web pages, emails, call transcripts, partner data) as untrusted: an instruction hidden in it can steer the model, and no prompt wording fully prevents that. Limit what such an agent can do rather than what it reads: no send, owner-change or overwrite tools on an agent that reads outside text, and rule-based checks on its output before anything acts on it. See "Guarding agents against untrusted input" in `references/build-test-iterate.md`.
 
 Use `references/workflow-playbooks.md` as the starting point for events, partner communications, product marketing, outbound and inbound routing. Adapt the playbook to the company; do not hand over a generic template.
 
@@ -88,9 +89,12 @@ Promote a workflow only when it meets its acceptance criteria across an agreed n
 
 Follow the protocol in `references/build-test-iterate.md`:
 - Agree acceptance criteria with the stakeholder before building: accuracy, coverage, cost per record, time to complete, and reviewer edit rate.
-- Build a golden set of 30–50 records with known correct answers, including awkward edge cases (duplicates, existing customers, open opportunities, personal email addresses, sole traders, non-English records, competitors).
+- Build a golden set of 30–50 records with known correct answers, including awkward edge cases (duplicates, existing customers, open opportunities, personal email addresses, sole traders, non-English records, competitors), records where the right result is to do nothing, and records with an instruction planted in their free text.
+- Run every AI step several times per record, not once: the same input can give different answers. For anything a customer or partner sees, judge it by the share of records it gets right on every run.
+- Check with rules wherever there is one right answer (tier, owner, fields written); use a model to grade only judgement calls, and compare that grader with a human reviewer first. Check what landed in the CRM, not the agent's report of it.
 - Run in shadow mode alongside the manual process for one or two cycles and compare.
 - Change one variable at a time and log every iteration, so you know which change moved the result.
+- After promotion, keep the golden set as a regression suite and rerun it whenever a prompt, model or provider changes.
 
 ### 6. Run and optimise
 
@@ -132,7 +136,7 @@ When auditing an existing setup, start from the platform's usage breakdown by co
 
 ## Compliance guardrails
 
-Before designing any workflow that sends email, LinkedIn messages or SMS, or enriches personal data, read `references/compliance-uk-eu.md`. In short: in the UK, cold email to limited companies is permitted under the Privacy and Electronic Communications Regulations but sole traders and ordinary partnerships need consent; UK GDPR still applies to named business contacts; several EU countries (Germany notably) require consent even for business-to-business email. Flag the issue and design around it — suppression lists, opt-out handling, subscriber-type classification — rather than ignoring it. This is not legal advice; say so when the stakes are high.
+Before designing any workflow that sends email, LinkedIn messages or SMS, or enriches personal data, read `references/compliance-uk-eu.md`. In short: in the UK, cold email to limited companies is permitted under the Privacy and Electronic Communications Regulations but sole traders and ordinary partnerships need consent; the same rules cover texts and private social media messages, LinkedIn included; a contact found publicly or through enrichment is not consent; using an agency to send does not move the responsibility; UK GDPR still applies to named business contacts; several EU countries (Germany notably) require consent even for business-to-business email. Flag the issue and design around it — suppression lists, opt-out handling, subscriber-type classification — rather than ignoring it. This is not legal advice; say so when the stakes are high.
 
 ## Output formats
 
@@ -153,5 +157,5 @@ Style: UK English. Lead with the recommendation, then the reasoning. Explain jar
 - `references/tool-landscape.md` — the layer model, market shifts in 2026, and each tool's role, pricing meter and limits (checked October 2026). Read when choosing, comparing or costing tools.
 - `references/workflow-playbooks.md` — ready-to-adapt workflows for events, partner communications, product marketing, outbound and inbound. Read when designing any of these.
 - `references/credit-optimisation.md` — cost model, levers by platform, worked example, monthly review. Read for any cost question and before finalising a blueprint's cost estimate.
-- `references/build-test-iterate.md` — blueprint template, field ownership matrix, test protocol, promotion criteria, runbook and monitoring. Read when designing, building or testing.
-- `references/compliance-uk-eu.md` — UK and EU rules for outreach and enrichment. Read before any workflow that contacts people or enriches personal data.
+- `references/build-test-iterate.md` — blueprint template, field ownership matrix, promotion criteria, guarding agents against untrusted input, test protocol, testing AI steps (repeat runs, checkers, regression), runbook and monitoring. Read when designing, building or testing.
+- `references/compliance-uk-eu.md` — UK and EU rules for outreach and enrichment (UK sections checked November 2026). Read before any workflow that contacts people or enriches personal data.
