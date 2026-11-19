@@ -30,8 +30,9 @@ Read `references/research-playbook.md` before you start. Establish:
 
 - what it sells, and the pricing model
 - ideal customer profile: sector, company size, geography
-- buyer personas and the wider buying group (who signs, who evaluates, who blocks)
+- buyer personas and the wider buying group (who signs, who evaluates, who blocks, and whether procurement or outside advisers take part)
 - indicative deal size and sales cycle
+- purchase interval: how often a typical customer buys, or reviews its supplier for, this kind of product (for subscriptions, the usual contract term is a fair proxy)
 - go-to-market motion: sales-led enterprise, product-led, partner-led, or a hybrid
 - market position against named competitors
 - regional footprint: offices, regional sales hiring, local-language website, customers by region
@@ -45,7 +46,7 @@ Aim for roughly eight to fifteen searches on the company. Fetch the pages that m
 
 Before choosing a single event, write a short thesis (four to six sentences) answering:
 
-- **Who must be in the room?** Job titles and account types, not "decision makers".
+- **Who must be in the room?** Job titles and account types, not "decision makers". Name the buying-group roles the event has to reach (champion, influencer, decision-maker, user, and the ratifier, often procurement); one contact per account rarely carries a decision.
 - **What job do events do for this company?** Pick the primary one: create pipeline in new accounts, accelerate open deals, expand existing customers, build credibility in a category, or enter a new market. A company can need more than one, but the mix should be weighted.
 - **What do the economics allow?**
 
@@ -54,6 +55,8 @@ For the economics, work out roughly what a qualified opportunity is worth and th
 > If first-year contract value is around £50,000 and roughly one in five qualified opportunities is won, each qualified opportunity is worth about £10,000 in expected bookings. A trade show costing £60,000 all-in needs to create something like six to ten qualified opportunities, depending on the return threshold leadership expects, before it pays its way.
 
 Use the user's real numbers when given. Otherwise state the assumption and its basis (pricing page, review-site comments, peer companies). Say which return threshold you used, because that is a leadership decision, not a fact.
+
+Then run the in-market check in `references/measurement.md`. Most accounts are not buying at any one time: if customers review their supplier about every 4 years, roughly 25% of the new target accounts the team meets will come into the market over the next 12 months, and about 6% in the next 3 months. If the event needs more qualified opportunities than that, it cannot pay its way on near-term pipeline: lower its tier, or keep it for a stated longer-term job and judge it over a longer window.
 
 Market position changes what events are for:
 
@@ -85,7 +88,7 @@ Score every serious candidate from 1 to 5 against these criteria and show the ta
 | Criterion | Weight | Evidence to use |
 |---|---|---|
 | Target-account density | 30% | Named accounts or close lookalikes among previous attendees, speakers, exhibitors; organiser audience breakdown |
-| Buyer match | 20% | Job titles and seniority of attendees against the personas from step 1 |
+| Buyer match | 20% | Job titles and seniority of attendees against the personas from step 1, and how many buying-group roles per account the event can reach |
 | Sales coverage in region | 20% | Can someone follow up within 48 hours, in the right language? If not, score 1 and say so |
 | Cost per expected qualified meeting | 20% | All-in cost (not just the package price) against realistic meetings |
 | Strategic necessity | 10% | Competitors present where absence is noticed, partner commitments, credibility in a new category |
@@ -129,7 +132,12 @@ Fit the plays to this company's sales motion. A company with a sales development
 
 ### 8. Measurement
 
-Define measures before the event, not after. Leading indicators: target accounts that attended or met the team, meetings held against meetings booked. Lagging indicators: pipeline sourced, pipeline influenced, cost per qualified opportunity, meeting-to-opportunity conversion, and win rate against a non-event baseline at 90 and 180 days. Report sourced and influenced pipeline separately so nobody counts the same opportunity twice, and be honest that influence is not proof of cause.
+Read `references/measurement.md`. Define measures before the event, not after, and set the reporting window by the event's job: within a quarter for accelerating open deals, 6 to 12 months or longer for creating pipeline in new accounts, renewal dates for expansion. Count by account and opportunity, not by lead.
+
+- **Leading indicators:** target accounts that attended or met the team; buying-group coverage (for each target account, how many of its expected buying-group roles the team met); meetings held against meetings booked.
+- **Lagging indicators:** pipeline sourced, pipeline influenced, cost per qualified opportunity, meeting-to-opportunity conversion, and win rate against comparable accounts the team did not meet, over the window set for the event's job.
+
+Report sourced and influenced pipeline separately so nobody counts the same opportunity twice, and be honest that influence is not proof of cause. Check the customer relationship management system's attribution settings before the event: if its influence window is shorter than the reporting window, later pipeline will not be counted.
 
 ## Output
 
@@ -137,7 +145,7 @@ Use this structure:
 
 1. **The recommendation in brief.** Five to eight sentences: the key insight about this company's event opportunity, the top events per region, indicative total budget, the expected outcome, and what to do first.
 2. **Company snapshot.** A table of the facts from step 1, each labelled Confirmed, Inferred or Assumed.
-3. **Event thesis and economics.**
+3. **Event thesis and economics,** including the in-market check and the reporting window for each event's job.
 4. **Regional plans.** For each region: a short landscape summary, the scored shortlist table, the recommended portfolio (event, format, timing, role in the plan, indicative cost, why it earns its place), and the skip list with reasons.
 5. **Twelve-month calendar.** A table by month and region.
 6. **Execution playbooks** for the Invest events, condensed for Lean presence.

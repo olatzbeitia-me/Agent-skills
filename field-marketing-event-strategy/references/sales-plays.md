@@ -19,7 +19,7 @@ Put a one-page agreement in place with the regional sales leader before signing 
 
 - **Sales commits to:** a named list of target accounts, a number of meetings booked per account executive before the event, attendance on the agreed days, follow-up of hot leads within one working day, and updating opportunities so the event can be measured.
 - **Marketing commits to:** the event programme, outreach support and content, lead qualification on site, routing within two working days, and reporting.
-- **Both agree:** what counts as a qualified meeting and a qualified opportunity, and what success looks like at 90 and 180 days.
+- **Both agree:** what counts as a qualified meeting and a qualified opportunity, the buying-group profile (the roles each target account should be reached through), and what success looks like over the reporting window set for the event's job (see `measurement.md`).
 
 If sales will not commit to booking meetings and following up, that is a strong signal to downgrade the event's tier.
 
@@ -40,7 +40,7 @@ Adjust to the company's actual team. Where a role does not exist (no sales devel
 
 ## 3. Before the event
 
-- **Target account list (12 weeks out).** Build it with sales: named accounts, the people within each account by persona, and whether there is an open opportunity. Split into tiers: accounts with open deals (accelerate), named new accounts (create), and existing customers (expand and use as advocates).
+- **Target account list (12 weeks out).** Build it with sales: named accounts, the people within each account by persona and buying role, and whether there is an open opportunity. Split into tiers: accounts with open deals (accelerate), named new accounts (create), and existing customers (expand and use as advocates).
 - **Multi-channel outreach (8 weeks out).** Personal emails and LinkedIn messages from account executives, sales development sequences, paid social targeted at the account list where budget allows, and invitations to the hosted side event. Lead with a reason to meet that is about the buyer's problem, not "come to our stand".
 - **Meeting booking.** Set a target per account executive. Use a shared calendar or a meeting-booking tool so slots do not clash. Book a meeting space at or near the event.
 - **Checkpoint (4 weeks out).** Review meetings booked against target with the sales leader. If short, step up outreach or change the tier.
@@ -50,7 +50,7 @@ Adjust to the company's actual team. Where a role does not exist (no sales devel
 
 - **Qualify, do not just scan.** Keep the lead capture form to three or four fields so people actually fill it in:
   - Lead rating: hot (agreed next step), warm (relevant, no next step yet), cold (general interest)
-  - Persona or role
+  - Persona (job title) and buying role (champion, influencer, decision-maker, user or ratifier), if known
   - Timeframe or trigger, if known
   - Next step agreed, and a short free-text note
 - **Morning briefing:** today's meetings, priority accounts expected, any changes. **Evening debrief:** hot leads reviewed, notes complete, tomorrow adjusted.
@@ -60,6 +60,8 @@ Adjust to the company's actual team. Where a role does not exist (no sales devel
 ## 5. After the event
 
 **Before routing,** deduplicate against existing records and check for open opportunities and existing customers. A sales development representative cold-calling a customer in the middle of a renewal does lasting damage.
+
+**Deduplicate people, not accounts.** A second or third person from the same account is a member of the buying group, not a duplicate lead. Attach them to the account and to any open opportunity, and tell the account owner how many buying-group roles the event reached (see `measurement.md`).
 
 **Follow-up tiers and service levels:**
 
@@ -78,13 +80,15 @@ Adjust to the company's actual team. Where a role does not exist (no sales devel
 - One campaign per event (or a parent campaign with child campaigns for the stand, the dinner and the webinar), set up before outreach begins so every touch is recorded.
 - Member statuses that mean something, for example: Invited, Registered, Attended, Visited stand, Meeting held, No-show.
 - Lead source and campaign fields completed on every record; opportunities created after the event linked to the campaign.
-- Contacts at accounts with open opportunities added to the campaign so influenced pipeline can be measured.
+- Contacts at accounts with open opportunities added to the campaign so influenced pipeline can be measured, and added to the opportunity itself with their buying role. Salesforce's automatic campaign influence works through campaign members who also hold a contact role on an open opportunity, so a contact left off the opportunity leaves the event's influence unrecorded.
+- The system's influence window checked against the reporting window for the event's job. In Salesforce, the time frame is the maximum number of days between a contact joining the campaign (often at invitation, weeks before the event) and the opportunity being created; see `measurement.md`.
 - Note that names differ by system (a campaign in Salesforce, a campaign or list plus properties in HubSpot); set it up the way the company's system and existing reporting work.
 
 ## 7. Reporting and closing the loop
 
-- **Within a week:** meetings held against booked, target accounts reached, leads by tier, cost per meeting.
+- **Within a week:** meetings held against booked, target accounts reached, buying-group coverage (how many target accounts the team reached through 1 role, 2 roles, or 3 or more), leads by tier, cost per meeting.
 - **30 days:** opportunities created (sourced) and existing opportunities with an event touch (influenced), reported separately.
-- **90 and 180 days:** pipeline progression, wins, cost per qualified opportunity, and win rate against a comparable non-event group where the data allows.
+- **90 and 180 days:** pipeline progression, wins, cost per qualified opportunity, and win rate against a comparable non-event group where the data allows. For accelerating open deals, the 90-day view is the verdict.
+- **12 months, for events whose job is new accounts:** opportunities created at the new target accounts the team met, against comparable target accounts it did not meet. Most of those accounts were not in the market at the time of the event, so judging them at 90 days understates the event (see `measurement.md`).
 - **Sales feedback on lead quality** at the 30-day review, used to refine the qualification questions and the target account list for the next event.
 - **Keep, change or drop:** each event's result feeds the scoring for next year's plan.

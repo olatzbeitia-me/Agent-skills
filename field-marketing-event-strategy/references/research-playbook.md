@@ -43,6 +43,7 @@ Label all of these **Inferred** and show the reasoning.
 
 - **Deal size:** pricing page tiers multiplied by realistic seat or usage counts for the typical customer; review-site comments about cost; job adverts quoting deal sizes; for public companies, revenue divided by customer count.
 - **Sales cycle:** enterprise sales-led motions with procurement and security review typically run several months to a year; self-serve or low price point products run in days or weeks. Job adverts sometimes state cycle length. Say which category the company falls into and why.
+- **Purchase interval:** how often a typical customer buys, or reviews its supplier for, this kind of product. Look for the usual contract term (pricing page, order form, terms of service, public filings), review-site comments about switching, and renewal language in customer stories. Feeds the in-market check in `measurement.md`.
 - **Buyers:** personas quoted in customer stories, reviewer job titles, the titles the company targets in its own webinars, and the job titles in its adverts for sales roles ("selling to chief information security officers").
 - **Regional priority:** where sales roles are being hired now matters more than where the website says it has offices. A region with no sales hires and no partners cannot follow up an event.
 
