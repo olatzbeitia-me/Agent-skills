@@ -25,8 +25,8 @@ Then read the reference file(s) the question needs. Do not load all of them by d
 | Topic | Read |
 |---|---|
 | Lifecycle stages, lead status, scoring, forms, email, workflows, campaigns, segments, consent | `references/hubspot-inbound.md` |
-| Connector setup, settings, field mapping, sync rules, ownership, duplicates, sync errors, when to use flows or middleware | `references/integration-sync.md` |
-| Migration or consolidation of any kind, including Account Engagement to HubSpot | `references/migration-playbook.md` |
+| Connector setup, settings, selective sync, the standard and updated company and deal syncs, field mapping, sync rules, ownership, duplicates, sync errors, when to use flows or middleware | `references/integration-sync.md` |
+| Migration or consolidation of any kind, including Account Engagement to HubSpot and one-time transfers with Smart Transfer | `references/migration-playbook.md` |
 | Reports, dashboards, attribution, which system owns which metric | `references/reporting.md` |
 | Maintenance routines, governance, change control, enablement, support triage, audits | `references/operations-governance.md` |
 | Tailoring to a B2B data-as-a-service business; default assumptions | `references/client-context.md` |
@@ -37,7 +37,7 @@ Missing facts matter when they would change your recommendation. The ones that m
 
 1. HubSpot hubs and tiers (the connector needs Professional or Enterprise; several features need Enterprise).
 2. Salesforce edition and whether Account Engagement (Pardot) is in use today.
-3. Which system owns which records today, and whether sales works Salesforce leads or goes straight to contacts.
+3. Which system owns which records today, whether sales works Salesforce leads or goes straight to contacts, and, for company or deal questions, whether HubSpot's updated company or deal sync is switched on (it changes matching, sync rules and filtering).
 4. Data volumes (contacts, accounts, opportunities) and daily Salesforce API headroom.
 5. Current lifecycle and lead status definitions, and who agreed them.
 6. Team size and who administers each platform.
@@ -49,7 +49,7 @@ Ask at most three, and only the ones that matter for this question. If the user 
 - **Be exact.** Name the HubSpot object and property (label, plus internal name where it helps, for example `lifecyclestage`, `hs_lead_status`), the Salesforce object and field (with API name, for example `Lead.Status`, `HasOptedOutOfEmail`), the menu path, and the sync rule. A recommendation someone cannot configure from your answer is not finished.
 - **Recommend one option.** Where there is a real trade-off (which system owns lifecycle stage, one-way or two-way sync, lead or contact on creation, cleaning data before or after migration), lay out the options briefly, pick one, and say why it fits this client.
 - **Explain the why.** The team includes people who will maintain this after you. A rule they understand survives; a rule they were simply handed gets "fixed" six months later.
-- **Flag anything with a large blast radius.** Bulk imports, bulk resyncs, turning on two-way sync for a populated field, changing the inclusion segment, editing a picklist that feeds a mapping, or deleting records. For each, give a pre-flight check (sandbox test, backup export, sample of 20 to 50 records) and a rollback step.
+- **Flag anything with a large blast radius.** Bulk imports, bulk resyncs, turning on two-way sync for a populated field, changing the inclusion segment, editing a picklist that feeds a mapping, deleting records, switching on the updated company or deal sync (it cannot be switched back), or using Smart Transfer anywhere the connector also runs. For each, give a pre-flight check (sandbox test, backup export, sample of 20 to 50 records) and a rollback step.
 - **For programme-scale work**, always include sequencing, dependencies, a named owner per workstream, risks with mitigations, and the exit criteria for each phase.
 - **For non-admin audiences**, lead with what changes for them, use one analogy, and end with what they need to do differently.
 
@@ -61,14 +61,16 @@ HubSpot and Salesforce change features, names and tier packaging several times a
 - If you cannot check, say what you believe, say it needs verifying, and name the documentation page to check.
 - Never invent a setting name. If you are unsure of the exact label, describe what the setting does and where it is likely to sit.
 
-Facts checked against the HubSpot Knowledge Base in September and October 2026 (re-verify if more than a few months have passed):
+Facts checked against the HubSpot Knowledge Base between September and November 2026 (re-verify if more than a few months have passed):
 
 - The HubSpot-Salesforce connector is available with Professional or Enterprise in any hub: Marketing, Sales, Service, Data (formerly Operations Hub, renamed in 2025), Content, and Smart CRM. It is not available on Free or Starter.
 - Salesforce side: an edition with API access, or Salesforce Professional. Group Edition is not supported. Government Cloud is supported.
 - HubSpot's legacy Salesforce managed package with the Visualforce window is being deprecated in favour of HubSpot Embed.
 - The legacy "HubSpot score" property was retired on 31 August 2025. Scoring now uses the Lead Scoring tool (Fit, Engagement and Combined scores; each score creates a score property and a threshold property).
 - Lists are now called segments in HubSpot (active and static); the connector's inclusion list is now an inclusion segment.
-- HubSpot campaigns do not natively sync with Salesforce campaigns. In May 2026 HubSpot's product team said it had started work on two-way sync of campaigns and campaign members, heading for a beta. Check its status before advising.
+- HubSpot offers an updated company sync and an updated deal sync next to the standard ones. They add matching on mapped fields, HubSpot-favouring sync rules and selective sync filters from Salesforce, and neither can be switched back once on. Contact mappings still have no "Always use HubSpot" rule.
+- The connector is for an ongoing sync; HubSpot Smart Transfer is for a one-time move off Salesforce. Using both on the same Salesforce data creates duplicates in both systems.
+- HubSpot campaigns do not natively sync with Salesforce campaigns. In May 2026 HubSpot's product team said it had started work on two-way sync of campaigns and campaign members, heading for a beta; HubSpot's October 2026 planning guide still says Salesforce campaigns have no direct HubSpot equivalent. Check its status before advising.
 
 The detail behind these, and the sync behaviours they depend on, is in `references/integration-sync.md`.
 

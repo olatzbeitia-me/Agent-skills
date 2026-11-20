@@ -1,6 +1,6 @@
 # Migration playbook, A to Z
 
-Contents: Scenarios · Phases 0 to 9 · Load order · Testing and user acceptance scenarios · Cutover and rollback · Account Engagement (Pardot) to HubSpot mapping · Indicative timeline · Risks · RACI
+Contents: Scenarios · Phases 0 to 9 · Load order · One-time transfer or ongoing sync · Testing and user acceptance scenarios · Cutover and rollback · Account Engagement (Pardot) to HubSpot mapping · Indicative timeline · Risks · RACI
 
 ## Scenarios
 
@@ -10,7 +10,7 @@ Identify which one applies; the plan changes.
 |---|---|---|
 | A. Add HubSpot alongside Salesforce | Sales stays in Salesforce, marketing adopts HubSpot | Sync design and duplicates |
 | B. Move marketing automation from Account Engagement (Pardot) to HubSpot, Salesforce stays | A B2B data-as-a-service business, given its stack signal | Losing opt-outs, attribution history and deliverability |
-| C. Consolidate the customer relationship management system (Salesforce to HubSpot, or the reverse) | Smaller teams simplifying, or scaling teams moving to Salesforce | Opportunity history, reporting continuity, user adoption |
+| C. Consolidate the customer relationship management system (Salesforce to HubSpot, or the reverse) | Smaller teams simplifying, or scaling teams moving to Salesforce | Opportunity history, reporting continuity, user adoption; duplicates if a one-time transfer and the connector both touch the same data |
 
 ## Phases
 
@@ -54,6 +54,7 @@ Recommendation: clean before migrating, not after. Duplicates and bad values mul
 - HubSpot: properties, subscription types, forms, templates, segments, scoring, workflows, campaigns, reports.
 - Salesforce: custom fields with field-level security, Lead conversion mapping, contact role enforcement, source stamping flow on opportunity, duplicate rule changes, integration user.
 - Integration configured in a Salesforce sandbox (and a HubSpot sandbox on Enterprise).
+- Decide in the sandbox, before production, whether to switch on HubSpot's updated company and deal syncs. Neither can be switched back, and both change how records match (see `integration-sync.md` section 2).
 - Exit: every item in the integration specification built and peer-reviewed.
 
 ### Phase 5: Migrate and test
@@ -92,6 +93,19 @@ See cutover and rollback below. Exit: go or no-go decision recorded.
 
 Use the connector's Salesforce import to bring existing Salesforce leads and contacts into HubSpot rather than a CSV round trip, so record IDs link from the start. Run large loads out of business hours and watch the API allocation.
 
+## One-time transfer or ongoing sync
+
+HubSpot offers 2 routes for Salesforce data, and they must never overlap (HubSpot Knowledge Base, November 2026).
+
+| Route | Use when | Watch for |
+|---|---|---|
+| Salesforce connector | Salesforce stays (scenarios A and B) | Initial load through the connector's Salesforce import, as above |
+| HubSpot Smart Transfer | Salesforce is being retired (scenario C, Salesforce to HubSpot) | Super Admins only. Carrying custom field mappings needs a Data Hub subscription. It creates workflows to bridge data-model differences and switches them on automatically, so review them before go-live. Turn off its automatic sync when filters or a mapping check are needed first, or unwanted records come across, which breaks the archive rule in Phase 3. Its sync keeps running in the background after the first pass. It can revert a transfer, so name that step in the rollback plan. Data moved in its optional one-time transfers does not stay up to date. |
+
+The 2 routes identify records differently, so running both on the same Salesforce data creates duplicates in HubSpot and in Salesforce. If Smart Transfer has been used, switch off all its sync connections before turning the connector on.
+
+Smart Transfer also lists Account Engagement (Pardot) as a source. In scenario B the connector stays live, and HubSpot's duplicate warning is written about Salesforce data only, so confirm with HubSpot how a Smart Transfer from Account Engagement matches records before relying on it there.
+
 ## Testing and user acceptance scenarios
 
 Test types: unit (each mapping in both directions), end to end (scripts below), user acceptance with real users, reconciliation (record counts per object and a 50-record field-level spot check), load (API usage at expected peak).
@@ -102,7 +116,7 @@ End-to-end scripts for a B2B data-as-a-service business:
 2. The same analyst requests a demo: becomes MQL, syncs as a lead, assigned by territory, joins the Salesforce campaign.
 3. A contact at an existing client account requests a demo: matched to the existing contact, not a new lead; expansion route followed.
 4. Webinar: registrant who attends and one who does not get the right member status and follow-up.
-5. Unsubscribe in HubSpot: Email Opt Out set in Salesforce within one sync cycle. Then the reverse.
+5. Unsubscribe in HubSpot: Email Opt Out set in Salesforce within one sync cycle. Then the reverse. Then clear Email Opt Out in Salesforce and confirm the contact stays unsubscribed in HubSpot, which is the documented behaviour.
 6. Representative rejects an MQL with a reason: recycle nurture starts in HubSpot.
 7. Representative converts a lead with a contact role on the opportunity: lifecycle moves to Opportunity; closed-won moves to Customer.
 8. Lead and contact share an email: the agreed resolution works and is documented.

@@ -128,6 +128,7 @@ Sequences in HubSpot need Sales Hub seats. If sales prospects from Salesforce or
 - Subscription types by topic, not by format: Research and reports, Webinars and events, Regulatory briefings, Product updates, plus one-to-one sales email.
 - Set the lawful basis on every form and import. For business contacts in the UK, legitimate interest with a clear opt-out is common for corporate addresses; sole traders and some markets need consent. The data protection officer makes the call; you make it operational.
 - Check that "Unsubscribed from all email" and the Salesforce `HasOptedOutOfEmail` (Email Opt Out) field are mapped and syncing in both directions. Test it: unsubscribe a test contact in each system and confirm the other updates within one sync cycle (about 15 minutes).
+- Know the limits of that sync (HubSpot Knowledge Base, August 2026). An opt-out passes between the systems only for contacts that sync, so a contact outside the inclusion segment, or a Salesforce record hidden from HubSpot by selective sync, does not carry it across. Clearing Email Opt Out in Salesforce never resubscribes a contact HubSpot holds as unsubscribed; only the person can do that. HubSpot sends only "opted out" or blank, so if Salesforce needs subscribed, unsubscribed and not specified as separate states, use custom Salesforce fields and Salesforce automation.
 - Marketing contacts drive the HubSpot bill. Decide how contacts created from Salesforce are set (marketing or non-marketing) and review the count monthly.
 
 ## 9. Content and search

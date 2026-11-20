@@ -1,6 +1,6 @@
 # HubSpot-Salesforce integration and sync
 
-Facts marked (KB) were checked against the HubSpot Knowledge Base in September and October 2026. Re-verify anything about tiers, limits or new features before quoting it to a client.
+Facts marked (KB) were checked against the HubSpot Knowledge Base between September and November 2026. Re-verify anything about tiers, limits or new features before quoting it to a client.
 
 Contents: 1 Prerequisites · 2 Core settings and recommended defaults · 3 Field mapping and sync rules · 4 System-of-record matrix · 5 Handoff flow end to end · 6 Owners and assignment · 7 Duplicates · 8 Campaign bridging · 9 Sync error catalogue · 10 "Record isn't syncing" runbook · 11 Beyond the native connector
 
@@ -24,11 +24,12 @@ Contents: 1 Prerequisites · 2 Core settings and recommended defaults · 3 Field
 Recommendations:
 
 1. Use a dedicated integration user, never a named person. When that person leaves, the sync breaks. Check whether a full Salesforce licence is needed for a System Administrator profile, or whether a cheaper integration licence is now supported by HubSpot, before budgeting.
-2. If Salesforce enforces login IP restrictions with "Enforce IP Restrictions on Every Request", the connector cannot connect, because HubSpot uses dynamic IP addresses (KB). Configure a network IP range instead.
+2. Login IP restrictions in Salesforce can stop the connector connecting. Set the HubSpot app's IP relaxation setting in Salesforce to Relax IP Restrictions, which exempts the app while users stay restricted. "Enforce IP Restrictions on Every Request" overrides that exemption, so restrict users with a network IP range instead of turning it on (KB).
 3. One Salesforce org per HubSpot account (KB). If several HubSpot accounts connect to one Salesforce org, set "Creating contacts in HubSpot" to not create contacts automatically, or each account will create the other's records.
 4. HubSpot's legacy managed package with the Visualforce window is being deprecated (KB). Use HubSpot Embed.
 5. Connect to a Salesforce sandbox first (there is a sandbox checkbox at install), configure and test there, then repeat in production.
 6. Records do not sync automatically after installation (KB). They sync through triggers or an import from Salesforce. Plan the initial load deliberately (see `migration-playbook.md`).
+7. The connector is built for an ongoing sync. A one-time move of Salesforce data into HubSpot uses HubSpot Smart Transfer instead. The two identify records differently, so using both on the same Salesforce data creates duplicates in both systems. If Smart Transfer has ever been used in the account, switch off all its sync connections before turning the connector on (KB).
 
 ## 2. Core settings and recommended defaults
 
@@ -36,7 +37,7 @@ Path: Settings > Integrations > Connected Apps > Salesforce > Data sync.
 
 | Setting (KB) | Options | Recommendation for a B2B data-as-a-service business | Why |
 |---|---|---|---|
-| Inclusion segment (Contacts > Sync rules > Limiting What Syncs) | Any active segment; none = every contact syncs | Use one. Include: MQL and later stages; hand-raisers; contacts already known to Salesforce (Salesforce Lead ID or Contact ID is known); contacts at accounts with an open opportunity or active client status. Exclude: global suppression, personal email domains, students, competitors, test records. | Keeps Salesforce for people sales should see, saves API calls, protects rep attention. The "already known to Salesforce" rule matters: a contact created from Salesforce but outside the segment is created once and then stops receiving updates (KB). |
+| Inclusion segment (Contacts > Sync rules > Limiting What Syncs) | Any active segment; none = every contact syncs | Use one. Include: MQL and later stages; hand-raisers; contacts already known to Salesforce (Salesforce Lead ID or Contact ID is known); contacts at accounts with an open opportunity or active client status. Exclude: global suppression, personal email domains, students, competitors, test records. | Keeps Salesforce for people sales should see, saves API calls, protects rep attention. The "already known to Salesforce" rule matters: a contact created from Salesforce but outside the segment is created once and then stops receiving updates (KB). Opt-outs also pass between the systems only for contacts that sync, so the rule is a consent safeguard as well (KB). |
 | When a HubSpot contact is created or updated, in Salesforce | Create or update the contact; Create or update the lead | Lead, if sales already runs a lead queue with assignment rules (most likely here). Contact, if sales works accounts directly and has a lead-to-account matching process. | Leads have no account, so if you choose lead, turn off HubSpot's automatic company creation from email domain, or duplicate companies appear when leads convert (KB). |
 | When a Salesforce lead or contact is updated, in HubSpot | Create or update the contact; Do nothing | Create or update | Marketing needs to see every person sales works, for suppression and attribution. Set these as non-marketing contacts unless they have a lawful basis for marketing, to control cost. |
 | When a Salesforce lead or contact is deleted | Delete the contact; Do nothing | Do nothing | Keeps engagement and consent history. Deleting in HubSpot never deletes in Salesforce (KB). |
@@ -45,16 +46,45 @@ Path: Settings > Integrations > Connected Apps > Salesforce > Data sync.
 | API call use (Sync Health > Allocated to HubSpot) | A number | Set below the org's daily limit minus other integrations' usage, with headroom of at least 20 percent. One contact sync can take up to four API calls (KB). | API exhaustion silently queues every sync, including opt-outs. |
 | Companies, Deals, Tickets, Activities tabs | Toggle each object on | Companies on, Deals on, Activities on for a narrow set of types, Tickets only if service uses it. | See below. |
 
+### Limiting what syncs from Salesforce (selective sync)
+
+Inclusion segments only control what HubSpot sends to Salesforce. HubSpot calls control in the other direction "selective sync" (KB, October 2026), and it works differently by object:
+
+- **Companies and deals**: filters on account or opportunity fields, combined with AND, under Data sync > [object] > Sync rules. Available only once the updated company or deal sync is switched on (see below).
+- **Leads and contacts**: there is no filter. HubSpot's selective sync guide hides records from the integration user with a cloned profile, a dedicated role, a Private organisation-wide default and criteria-based sharing rules. It needs Salesforce Enterprise, HubSpot Support does not cover it, records owned by the integration user always sync, and records HubSpot creates in Salesforce must also meet the sharing rule or they stop syncing. The guide is undated and refers to a permission set from HubSpot's Salesforce package, so check it against the current package before relying on it.
+
+Recommendation for this profile: filter accounts and opportunities only where there is a clear rule, for example opportunity record types marketing never reports on, and check the filter against the attribution scope in `reporting.md`. Avoid the sharing-rule method for leads and contacts unless volume or data minimisation requires it. A Salesforce lead or contact hidden from HubSpot no longer receives HubSpot opt-outs through the sync, so any email sent from Salesforce to those records needs its own suppression check. To test whether a record will sync, log in to Salesforce as the integration user and open it: if the integration user can see it, it syncs.
+
 ### Companies and accounts
 
-- HubSpot companies sync with Salesforce accounts. The integration de-duplicates companies by associated contacts, not by domain (KB).
-- For an account-based, sales-led business, Salesforce should own account creation and ownership. Check the company sync rules so HubSpot does not create Salesforce accounts from marketing data.
+- HubSpot companies sync with Salesforce accounts. There are 2 versions of the company sync. Ask which one the account uses before answering anything about matching, sync rules or filters.
+- The **standard company sync** de-duplicates companies by associated contacts, not by domain (KB).
+- The **updated company sync** (Salesforce app settings > Feature discovery > New Company Sync; KB, September 2026) keeps the standard behaviour and adds:
+  - companies sync even when they have no associated contacts;
+  - matching on mapped fields whose values are identical in both systems, for example a domain field, for records matched after it is switched on;
+  - object-level rules for what creating, updating and deleting does in each direction, and a conflict rule that decides which system wins when two records first match;
+  - association sync from Salesforce lookup fields, with association labels and a chosen direction;
+  - an "Always use HubSpot" field rule, which works only while the object-level rule is two-way;
+  - selective sync filters on account fields.
+- Merging companies in HubSpot does not merge the Salesforce accounts; merge them in Salesforce separately (KB).
+- **Switching on the updated company sync cannot be undone**, and it raises Salesforce API use while it indexes records (KB). Treat it as a large-blast-radius change: test it in a sandbox, clean the matching field first (values must match exactly, so strip prefixes such as "www." and trailing slashes from domains), confirm API headroom, and record the decision in the integration specification.
+- For an account-based, sales-led business, Salesforce should own account creation and ownership. Set the company sync rules so HubSpot does not create Salesforce accounts from marketing data.
 - Map Client segment, territory, account tier, target account flag and active client flag from Salesforce to HubSpot with "Always use Salesforce", so marketing segments on what sales maintains.
 
 ### Deals and opportunities
 
 - HubSpot deals sync with Salesforce opportunities. Map each Salesforce sales process (record type) to a HubSpot pipeline and every opportunity stage to a pipeline stage. Inactive stages cause errors.
-- HubSpot does not de-duplicate deals (KB). Let Salesforce create opportunities; treat HubSpot deals as a read-only mirror for attribution and segmentation, with mappings set to "Always use Salesforce".
+- The **standard deal sync** does not de-duplicate deals (KB).
+- The **updated deal sync** (Feature discovery > New Deal Sync; KB, October 2026) migrates existing pipeline mappings automatically and adds:
+  - only deals in HubSpot pipelines mapped to a Salesforce record type are eligible to sync;
+  - matching on identical mapped field values, for example an order number, for records matched after it is switched on;
+  - object-level create, update and delete rules in each direction, and a first-match conflict rule;
+  - association sync with labels and a chosen direction;
+  - "Always use HubSpot" and "Use HubSpot unless blank" field rules, which work only while the object-level rule is two-way;
+  - selective sync filters for opportunities coming into HubSpot, and an inclusion segment for deals going to Salesforce.
+- Merging deals in HubSpot does not merge opportunities. The merged deal keeps syncing with the opportunity whose Salesforce record ID was kept as the winning value during the merge, so choose it deliberately (KB).
+- Like the company sync, **the updated deal sync cannot be switched back** and raises API use while it indexes (KB). Same pre-flight as above.
+- Let Salesforce create opportunities; treat HubSpot deals as a read-only mirror for attribution and segmentation, with mappings set to "Always use Salesforce". On the updated sync, also set the object-level rules so HubSpot deals do not create Salesforce opportunities.
 
 ### Activities
 
@@ -74,7 +104,14 @@ Path: Data sync > [object] > Property mappings. Up to 500 mappings per object (K
 | Two-way | The most recent value wins in either system, including deletions. | Shared fields both teams edit, and HubSpot-owned fields that are locked read-only in Salesforce. |
 | Don't sync | Nothing passes either way. | Standard mappings you cannot delete but want to stop. Not available for "Unsubscribed from all email" (KB). |
 
-There is no "Always use HubSpot" rule on contact, company or deal mappings (custom object and ticket mappings do offer it). To make a field HubSpot-owned, map it Two-way and make it read-only in Salesforce for all profiles except the integration user.
+Which extra rules exist depends on the object (KB):
+
+- **Contacts**: only the 4 rules above (checked September 2026). To make a contact field HubSpot-owned, map it Two-way and make it read-only in Salesforce for all profiles except the integration user.
+- **Companies**: the updated company sync adds "Always use HubSpot".
+- **Deals**: the updated deal sync adds "Always use HubSpot" and "Use HubSpot unless blank".
+- **Custom objects and tickets**: "Always use HubSpot" is offered.
+
+The HubSpot-favouring rules on companies and deals work only while that object's object-level rule is two-way; with a one-way object rule, the one-way direction wins. HubSpot's planning guide lists all 5 rules together, so confirm the object and the sync version before promising a rule to a client.
 
 ### Compatible field types (KB)
 
@@ -96,6 +133,8 @@ There is no "Always use HubSpot" rule on contact, company or deal mappings (cust
 - Salesforce reference (lookup) fields arrive as 18-character record IDs. Map them to a HubSpot dropdown and add labels to the options by hand; this needs maintenance whenever values are added.
 - Properties of the "HubSpot user" type cannot be mapped.
 - Never map Lead ID or Contact ID fields yourself; the integration manages them and custom mappings cause "Duplicate id specified" errors.
+- Never map one HubSpot property to several Salesforce fields, or add a mapping that overlaps a standard one: values get overwritten or loop between the systems. HubSpot still flags a duplicate pair when one of the two is set to Don't sync, so delete the custom mapping rather than parking it there (KB).
+- A bulk resync of company mappings handles at most 200,000 companies at a time; beyond that HubSpot reports that not all updates synced, so split larger sets (KB).
 - Use the Refresh action on a picklist mapping after adding values in Salesforce.
 - Export the mappings regularly (Export field mappings (CSV)) and keep the file with the data dictionary.
 
@@ -154,7 +193,8 @@ Recommendation: let Salesforce assign owners (territory rules, or a lead-to-acco
 
 ## 7. Duplicates
 
-- HubSpot de-duplicates contacts by email. Companies synced through the integration are de-duplicated by associated contacts. Deals are not de-duplicated.
+- HubSpot de-duplicates contacts by email. Companies: the standard sync matches through associated contacts; the updated company sync can match on an identical mapped field such as domain. Deals: the standard sync does not de-duplicate; the updated deal sync can match on an identical mapped field. Matching in the updated syncs applies only to records matched after they are switched on, so clean existing duplicates first (KB).
+- Merging companies or deals in HubSpot never merges the Salesforce records (KB). Merge in Salesforce as well.
 - A Salesforce lead and a Salesforce contact with the same email cannot both sync to one HubSpot contact: one fails with "Email already in use". Decide which wins and merge or convert in Salesforce.
 - Salesforce duplicate rules set to Block will reject integration writes ("Salesforce duplicate rule" error). Prefer Allow with alert for the integration user, or add a rule condition that excludes the integration user, and clean the duplicates through a scheduled process.
 - Clean before you connect. Every duplicate present on day one multiplies through the sync.
