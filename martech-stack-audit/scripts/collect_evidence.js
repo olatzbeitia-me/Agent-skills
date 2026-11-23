@@ -39,22 +39,37 @@
   }
   const thirdPartyList = Object.entries(thirdParty).sort((a, b) => b[1].n - a[1].n);
 
-  // First-party paths that betray a tool or platform (server-side tagging, proxied analytics, CMS paths)
+  // First-party paths that betray a tool or platform (proxied analytics, CMS paths). Google tag loaders
+  // (gtm.js, gtag/js or a Google tag gateway path) are recognised by their ?id= parameter further down.
   const pathLabels = [
-    [/\/gtm\.js/, 'first-party gtm.js (server-side tagging?)'], [/\/gtag\/js/, 'first-party gtag.js'],
     [/\/g\/collect/, 'first-party GA4 collect'], [/\/collect\b/, 'first-party /collect endpoint'],
     [/_vercel\/insights/, 'Vercel Analytics'], [/cdn-cgi\/zaraz/, 'Cloudflare Zaraz'], [/cdn-cgi\/rum/, 'Cloudflare RUM'],
     [/cdn-cgi\/challenge/, 'Cloudflare challenge'], [/\/_next\//, 'Next.js assets'], [/\/_nuxt\//, 'Nuxt assets'],
     [/\/_astro\//, 'Astro assets'], [/\/hubfs\//, 'HubSpot file manager'], [/\/etc\.clientlibs\//, 'Adobe Experience Manager'],
     [/demandware/, 'Salesforce Commerce Cloud'], [/\/static\/version\d+/, 'Magento static'], [/\/-\/media\//, 'Sitecore media'],
   ];
+  // Google tags and Analytics hits routed through infrastructure the site controls: Google tag gateway for
+  // advertisers (a reserved path on the site's domain) or server-side tagging (a path, a subdomain or a
+  // non-Google host). Google's own domains are the normal route and are not reported here.
+  const googleHost = /(^|\.)(google-analytics\.com|analytics\.google\.com|googletagmanager\.com|google\.[a-z.]+|doubleclick\.net|googlesyndication\.com|googleadservices\.com)$/;
+  const googleTagId = /^(GTM|GT|G|AW|DC)-[A-Z0-9]{4,12}$/;
   const pathHints = [];
   for (const u of [].concat(scriptSrcs, resourceUrls)) {
     const x = urlOf(u);
-    if (!x || !isFirstParty(x.hostname.toLowerCase())) continue;
-    const plugin = x.pathname.match(/\/wp-content\/plugins\/([^/]+)/);
-    if (plugin) pathHints.push(`WordPress plugin ${plugin[1]}`);
-    for (const [re, label] of pathLabels) if (re.test(x.pathname)) pathHints.push(`${x.hostname} ${label}`);
+    if (!x || !/^https?:$/.test(x.protocol)) continue;
+    const h = x.hostname.toLowerCase();
+    const tagId = safe(() => x.searchParams.get('id'), null);
+    const isGoogleTag = !!tagId && googleTagId.test(tagId);
+    const isAnalyticsHit = /\/g\/collect\b/.test(x.pathname);
+    if (isFirstParty(h)) {
+      if (isGoogleTag) pathHints.push(`${h} Google tag ${tagId} served first-party from ${x.pathname.slice(0, 40)} (Google tag gateway or server-side tagging)`);
+      const plugin = x.pathname.match(/\/wp-content\/plugins\/([^/]+)/);
+      if (plugin) pathHints.push(`WordPress plugin ${plugin[1]}`);
+      for (const [re, label] of pathLabels) if (re.test(x.pathname)) pathHints.push(`${h} ${label}`);
+    } else if (!googleHost.test(h)) {
+      if (isGoogleTag) pathHints.push(`${h} Google tag ${tagId} served from a non-Google host (server-side tagging or another proxy)`);
+      if (isAnalyticsHit) pathHints.push(`${h} GA4 hits sent to a non-Google host (server-side tagging or another proxy)`);
+    }
   }
 
   // ---- Identifiers in page source and URLs ----
@@ -128,15 +143,28 @@
   const sessionKeys = safe(() => uniq(Object.keys(window.sessionStorage)).filter((k) => k !== SEEN_KEY), []);
 
   // ---- Data layer: event names, Google tag config IDs and consent mode commands ----
+  // Order matters: Google asks for the consent default to be set before any tag is configured, so a
+  // default queued after a config command is reported.
   const dataLayerEvents = [];
   const gtagCommands = [];
   safe(() => {
+    let firstConfig = null;
+    let lateDefaultReported = false;
     for (const e of window.dataLayer || []) {
       if (!e) continue;
       const isArgs = Object.prototype.toString.call(e) === '[object Arguments]' || Array.isArray(e);
       if (isArgs) {
-        if (e[0] === 'consent') gtagCommands.push(`consent ${e[1]} ${safe(() => JSON.stringify(e[2]), '').slice(0, 200)}`);
-        else if (e[0] === 'config') gtagCommands.push(`config ${e[1]}`);
+        if (e[0] === 'consent') {
+          gtagCommands.push(`consent ${e[1]} ${safe(() => JSON.stringify(e[2]), '').slice(0, 200)}`);
+          if (e[1] === 'default' && firstConfig && !lateDefaultReported) {
+            gtagCommands.push(`consent default queued after config ${firstConfig}`);
+            lateDefaultReported = true;
+          }
+        } else if (e[0] === 'config') {
+          const serverUrl = safe(() => (e[2] && typeof e[2] === 'object' ? e[2].server_container_url : null), null);
+          gtagCommands.push(`config ${e[1]}${serverUrl ? ` server_container_url ${hostOf(serverUrl) || String(serverUrl).slice(0, 60)}` : ''}`);
+          if (!firstConfig) firstConfig = e[1];
+        }
       } else if (typeof e === 'object' && e.event) {
         dataLayerEvents.push(String(e.event).slice(0, 50));
       }
@@ -259,7 +287,7 @@
   const sections = [
     ['THIRD-PARTY HOSTS (requests, first path)', thirdPartyList, ([h]) => h, ([h, v]) => `${h} ${v.n} ${v.path}`],
     ['FIRST-PARTY HOSTS', [...firstPartyHosts]],
-    ['FIRST-PARTY PATH HINTS', uniq(pathHints)],
+    ['PATH HINTS', uniq(pathHints)],
     ['IDS', ids],
     ['GLOBALS', globals],
     ['COOKIES', cookieNames],
