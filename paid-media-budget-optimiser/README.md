@@ -9,6 +9,7 @@ Most budget reviews rank campaigns by average cost per conversion and move money
 - Fits a diminishing-returns curve to each campaign's weekly spend and conversions.
 - Works out the cost of the next conversion for each campaign at its current spend.
 - Moves budget in small steps from the campaign where the next conversion is most expensive to the one where it is cheapest, within a cap per campaign (30% by default), keeping the total the same.
+- Stays inside the spend levels each campaign has actually run at. Beyond its lowest and highest weekly spend a curve is guessing, so a campaign that reaches that edge stops there and the report suggests a test to extend it.
 - Refuses to guess when the history cannot support it: too few weeks, spend that barely varied, or a poor fit. Those campaigns are held, with a spend test to make them readable.
 - Flags spend with no conversions in recent weeks, and tells you to check tracking before pausing.
 
@@ -16,14 +17,15 @@ Most budget reviews rank campaigns by average cost per conversion and move money
 
 12 weeks of fictional data across Google Ads, Microsoft Ads, Meta and LinkedIn. Full report: [`examples/output/budget-plan.md`](examples/output/budget-plan.md).
 
-> Same total (£9,187 a week), predicted conversions from 99.2 to 101.8 a week (**+3%**), cost per conversion from £93 to £90.
+> Same total (£9,187 a week), predicted conversions from 99.2 to 101.7 a week (**+2%**), cost per conversion from £93 to £90.
 >
 > | Campaign | Now | Recommended | Average cost per conversion | Cost of the next conversion: now → after |
 > |---|---:|---:|---:|---|
 > | Microsoft Ads: generic search | £539 | £689 | £91 | £98 → £99 |
+> | Meta: lookalike audiences | £2,202 | £1,877 | £109 | £185 → £172 |
 > | LinkedIn: lead gen forms | £2,203 | £1,553 | £184 | £240 → £222 |
 >
-> Brand search has the lowest average cost (£39), but its next conversion costs £135, and the report warns to check impression share before giving it more.
+> The Meta cut stops at £1,877 because the campaign has never run below £1,860 a week, so the curve cannot say what happens lower down. Brand search has the lowest average cost (£39), but its next conversion costs £135, and the report says to check how often its ads missed searches because the budget ran out before giving it more.
 
 ## How it works, in plain terms
 
@@ -46,5 +48,6 @@ The input format and the checks to make before acting are in [`SKILL.md`](SKILL.
 
 - The curves describe the past. Seasonality, new creative, bidding changes or a competitor's push can change them.
 - It cannot see impression share, audience saturation or frequency. The skill instructions tell Claude to check those before recommending a move.
+- Keeping inside each campaign's spend history makes the plan cautious: a campaign whose spend has only ever varied a little cannot be moved far until a test widens its history. `--allow-extrapolation` lifts the limit and flags every move that goes beyond the history.
 - Conversions must mean the same thing on every platform, with similar attribution windows.
 - All campaign data in `examples/` is fictional.
