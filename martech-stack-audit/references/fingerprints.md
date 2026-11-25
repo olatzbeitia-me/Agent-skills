@@ -49,7 +49,9 @@ Use these subcategories for the "Not detected" lines in the report.
 
 - **Google Tag Manager**: hosts `www.googletagmanager.com/gtm.js`; globals `google_tag_manager`, `dataLayer`; other `GTM-XXXXXXX` container ID. `Object.keys(google_tag_manager)` lists loaded container and Google tag IDs.
 - **Google tag (gtag.js)**: hosts `www.googletagmanager.com/gtag/js?id=`; global `gtag`; IDs `G-` (Analytics), `AW-` (Ads), `DC-` (Floodlight).
-- **Server-side Google Tag Manager**: `gtm.js` or `/g/collect` served from a first-party subdomain or custom path. Vendors behind it are hidden from the browser.
+- **Google tag gateway for advertisers**: the Google tag or Tag Manager container loads from a reserved path on the site's own domain instead of `www.googletagmanager.com`, for example `/metrics/?id=GTM-XXXXXXX` (the path is the site's choice), and some Google hits go to the same path. A content delivery network or load balancer forwards the path to Google. It serves Google's tags only: other vendors in the container still load from their own domains.
+- **Server-side tagging (Google Tag Manager server container)**: hits go to a tagging server, set up as a path on the site's domain, a subdomain or a cloud provider's default domain (Google's examples are `www.example.com/metrics`, `metrics.example.com` and a `run.app` address). Evidence: `server_container_url` in a `gtag('config', …)` command, `gtm.js` or `/g/collect` on a host that isn't Google's. The server can pass data on to other vendors, which the browser never sees.
+- **Telling them apart**: a first-party path alone fits either set-up. Only a `server_container_url` or hits to a non-Google host show a server container; otherwise report "Google tags served first-party" and name both possibilities.
 - **Adobe Experience Platform Tags (formerly Launch / DTM)**: hosts `assets.adobedtm.com`; global `_satellite`.
 - **Tealium iQ**: hosts `tags.tiqcdn.com`; global `utag`. Tealium EventStream / AudienceStream: `collect.tealiumiq.com`.
 - **Segment (Twilio)**: hosts `cdn.segment.com`, `api.segment.io`; global `analytics` (check it has `_writeKey` or `SNIPPET_VERSION`; the name is generic); cookie `ajs_anonymous_id`, `ajs_user_id`.
@@ -253,6 +255,11 @@ These reveal which companies visit (reverse IP lookup) or feed account-based adv
 - **HubSpot cookie banner**: `js.hs-banner.com`; cookies `__hs_cookie_cat_pref`, `__hs_opt_out`.
 - **IAB Transparency and Consent Framework**: global `__tcfapi` (any compliant platform); `__gpp` for the Global Privacy Platform.
 - **Google Consent Mode**: `gtag('consent','default',…)` and `('consent','update',…)` entries in the data layer, or `gcs=`/`gcd=` parameters on Google requests.
+  - **Consent types**: Google's checks look for a default for at least `ad_storage`, `analytics_storage`, `ad_user_data` and `ad_personalization`. The last two were added in November 2023 ("consent mode v2"), and Google requires them for personalised advertising, such as remarketing, with visitors from the European Economic Area. A default that sets only the first two is an older set-up.
+  - **Basic or advanced**: in basic mode, Google tags are blocked until the visitor chooses, so nothing reaches Google before then. In advanced mode, the tags load at once with defaults (usually denied) and send measurements without cookies until consent is granted. Requests to Google before a choice, with a denied default and no `_ga` or `_gcl_au` cookie, are advanced mode working as designed.
+  - **Order**: Google's troubleshooting guide asks for the default to be set before any tag or other code uses consent, and lists a late default as a common fault. The collector reports `consent default queued after config <ID>` when a `config` command comes first in the data layer.
+  - **Request parameters**: `gcs` carries the `ad_storage` and `analytics_storage` state, and `gcd` is sent on every Google request. Google says their encoding may change, so quote them as evidence that consent mode is present but read the consent state from the data layer commands and the cookies, not by decoding the values.
+- **Microsoft Advertising consent mode**: Microsoft began enforcing consent signals on 5 May 2025. Its consent mode adjusts the Universal Event Tracking tag's cookie use for visitors from the European Economic Area, the UK and Switzerland through an `ad_storage` setting, or the signal can come through the IAB Transparency and Consent Framework (`__tcfapi`). Look for either in the page source, the tag manager container or the consent platform's settings.
 
 ## 16. E-commerce platforms
 
@@ -432,3 +439,5 @@ Use the current name, with the former name in brackets where readers may know it
 - Payment and review logos in the footer can be stale artwork. Look for the script or widget before confirming.
 - Content Security Policy allow-lists are often copied from templates and rarely pruned: "likely" at best.
 - Cookie policies list vendors the site may have stopped using: "likely" at best.
+- Google requests before a consent choice are not, on their own, tracking before consent: in advanced consent mode they carry no cookies until the visitor agrees. Check the consent default and the cookies before reporting them (section 15).
+- A Google tag or `/g/collect` hit on the site's own domain is not proof of server-side tagging: Google tag gateway for advertisers produces the same picture (section 2).

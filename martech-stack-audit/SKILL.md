@@ -42,7 +42,10 @@ Open a new tab for the audit. Some browser tools only record network requests fr
 2. Run the evidence collector (`scripts/collect_evidence.js`, see below).
 3. Read the network requests. Filtering by a vendor fragment (`facebook`, `linkedin`, `collect`, `bat.bing`) is a quick way to confirm a specific tag fired and see which events it sent.
 
-What loads before any consent choice is a finding: an advertising pixel firing before consent is a notable choice for a UK or EU site. Report it factually and don't offer a legal opinion.
+What loads before any consent choice is a finding, but read it carefully, because Google's tags can be set up to load before a choice:
+- **Google tags in advanced consent mode** load straight away with consent set to denied by default, and send measurements without cookies until the visitor chooses. If `GOOGLE TAG COMMANDS` shows a `consent default` with storage denied and no Google analytics or advertising cookies (`_ga`, `_gcl_au`) are set yet, report "Google tags load before consent in advanced consent mode (no cookies until consent)", not tracking before consent. In basic consent mode, Google tags don't load until the choice.
+- **Cookies set, or other vendors' pixels sending requests, before the choice** are the finding worth reporting for a UK or EU site. Report them factually and don't offer a legal opinion.
+- Note the consent set-up for the data maturity summary: which of Google's four consent types the default sets (`ad_storage`, `analytics_storage`, `ad_user_data`, `ad_personalization`), and whether the collector reports a `consent default queued after config` (Google asks for the default before any tag uses consent). `references/fingerprints.md` section 15 has the detail, including Microsoft Advertising's own consent mode.
 
 ### 2. Homepage after the consent choice and a full scroll
 
@@ -72,7 +75,11 @@ Run `scripts/site_checks.js` once per audit, from the homepage, the same way as 
 
 If the script can't run, do it by hand: open `https://www.googletagmanager.com/gtm.js?id=GTM-XXXXXXX` and search its text, and open `https://dns.google/resolve?name=DOMAIN&type=TXT` (and `type=MX`, `type=CNAME` for subdomains) and read the JSON.
 
-If `gtm.js` or analytics collection calls come from a first-party subdomain, the site uses server-side tagging. That hides vendors from the browser, so say so under limits.
+**Google measurement routed through the site's own infrastructure.** The collector reports it under `PATH HINTS` (a Google tag loaded from the site's own domain, or Analytics hits sent to a host that isn't Google's) and under `GOOGLE TAG COMMANDS` (a `server_container_url`). Two set-ups look alike from the browser:
+- **Google tag gateway for advertisers**: the site's content delivery network or load balancer forwards a reserved path (for example `/metrics/`) to Google, so the Google tag and some of its hits use the site's domain. Other vendors' tags still load from their own domains.
+- **Server-side tagging**: hits go to a server container on a path, a subdomain or a cloud provider's domain, and the container can pass data on to Google and to other vendors from the server.
+
+Rate "Google tags served first-party" as confirmed. Call it server-side tagging only with direct evidence (a `server_container_url`, or Analytics hits to a non-Google host); otherwise name both possibilities. Either way, say under limits that data passed on from a server can't be seen from a browser, so a vendor missing from the page may still receive data.
 
 ### 5. Cookie policy and consent platform
 
@@ -92,11 +99,11 @@ Stop when new pages stop producing new tools. Eight to twelve pages is usually e
 
 `scripts/collect_evidence.js` is a self-contained snippet. Read the file and pass its full contents to the browser's JavaScript tool on the page you're inspecting. Towards the site it is read-only; in your own tab it keeps one session storage key so that later runs report only what's new. It returns compact text, one line per section:
 
-- `THIRD-PARTY HOSTS` (request count and first path seen), `FIRST-PARTY HOSTS`, `FIRST-PARTY PATH HINTS` (server-side tagging, proxied analytics, CMS paths, WordPress plugins)
+- `THIRD-PARTY HOSTS` (request count and first path seen), `FIRST-PARTY HOSTS`, `PATH HINTS` (Google tags and hits routed through the site's own infrastructure, proxied analytics, CMS paths, WordPress plugins)
 - `IDS`: account and container identifiers (Google Tag Manager, Analytics, Ads, Floodlight; Meta, LinkedIn, TikTok, Microsoft; HubSpot, Marketo, Pardot; Clarity, Hotjar, Optimizely, Intercom)
 - `GLOBALS`: known vendor objects on the page
 - `COOKIES`, `LOCAL STORAGE KEYS`, `SESSION STORAGE KEYS`: names only, never values
-- `DATA LAYER EVENTS` and `GOOGLE TAG COMMANDS` (consent mode defaults and updates, configured Google tag IDs)
+- `DATA LAYER EVENTS` and `GOOGLE TAG COMMANDS` (consent mode defaults and updates, a default queued too late, configured Google tag IDs and any server container host)
 - `FORMS` (where they post, vendor hints, field count), `IFRAMES` (host and title)
 - `HEADERS` (server, content delivery network and platform hints) and `CSP HOSTS` (hosts the Content Security Policy allows)
 - `META`, `MARKERS` (framework and CMS), `COMMENTS`, `CREDITS` ("powered by" text), `BADGES`
@@ -181,7 +188,7 @@ For the summary, keep each paragraph to two or three sentences and tie every cla
 - **Acquisition mix**: which advertising platforms have pixels (search, paid social, programmatic, business-to-business intent) and what that implies about where budget goes.
 - **Sales motion**: self-serve checkout and payments, versus demo booking, chat-to-sales and lead routing; which marketing automation pairs with which CRM.
 - **Personalisation maturity**: none; rules-based (popups, segments); experimentation; recommendations.
-- **Data maturity**: tag manager discipline, consent mode, customer data platform or server-side tagging, product analytics.
-- **Overlaps, legacy and gaps**: two tools doing the same job, dead tags still loading, tags firing before consent, obvious gaps for the business model. Where a gap might just be invisible to you (product analytics living inside a logged-in app, say), say so.
+- **Data maturity**: tag manager discipline; consent mode (basic or advanced, and whether all four Google consent types are set); first-party tagging (Google tag gateway or server-side tagging); customer data platform; product analytics.
+- **Overlaps, legacy and gaps**: two tools doing the same job, dead tags still loading, cookies set or other vendors' pixels firing before consent (not Google's cookieless measurements in advanced consent mode), obvious gaps for the business model. Where a gap might just be invisible to you (product analytics living inside a logged-in app, say), say so.
 
 Label speculation as speculation, and don't recommend vendors unless asked.

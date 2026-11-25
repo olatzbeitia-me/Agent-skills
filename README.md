@@ -1,6 +1,6 @@
 # Growth and marketing agents
 
-I have built reussable agents for growth marketing, demand generation and marketing operations work. Each one turns a recurring piece of marketing work into a repeatable method: the judgement written down as instructions for Claude, and, where the work is numerical, tested code.
+I have built reusable agents for growth marketing, demand generation and marketing operations work. Each one turns a recurring piece of marketing work into a repeatable method: the judgement written down as instructions for Claude, and, where the work is numerical, tested code.
 
 ## The agents
 
@@ -29,7 +29,7 @@ I have built reussable agents for growth marketing, demand generation and market
 
 | Agent | The question it answers | Contains |
 |---|---|---|
-| [martech-stack-audit](martech-stack-audit/) | Which marketing, sales and data tools sit behind this website, and how sure are we? | Skill and browser scripts |
+| [martech-stack-audit](martech-stack-audit/) | Which marketing, sales and data tools sit behind this website, and how sure are we? | Skill, browser scripts and tests |
 | [hubspot-salesforce-architect](hubspot-salesforce-architect/) | How should lifecycle stages, scoring, the HubSpot and Salesforce sync and pipeline reporting be designed and kept healthy? | Skill and reference guides |
 | [pardot-to-hubspot-migration](pardot-to-hubspot-migration/) | How do we move marketing automation from Pardot to HubSpot, with Salesforce staying, without losing data, consent or attribution? | Skill, checklists and templates |
 | [gtm-automation-architect](gtm-automation-architect/) | Which go-to-market work should be automated, with which tool, and how do we build and test it? | Skill and workflow playbooks |
@@ -64,6 +64,12 @@ The Python agents need only Python 3.9 or later, with no packages to install. To
 
 ```bash
 for d in pipeline-forecast abm-account-prioritisation paid-media-budget-optimiser; do python3 -m unittest discover -s $d/tests; done
+```
+
+The martech stack audit's browser scripts are tested in headless Chromium through Playwright (`pip install playwright`, then `python3 -m playwright install chromium`); without it, those tests are skipped:
+
+```bash
+python3 -m unittest discover -s martech-stack-audit/tests
 ```
 
 The course generator has its own setup: see [its README](course-generator-handwritten/README.md).
