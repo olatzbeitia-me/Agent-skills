@@ -13,7 +13,9 @@ For each campaign this script:
     varied, or a poor fit), and says so;
   * flags spend with no conversions in recent weeks;
   * moves budget in small steps from the campaign with the highest marginal cost to the one with the
-    lowest, within a maximum change per campaign, keeping the total budget the same.
+    lowest, within a maximum change per campaign, keeping the total budget the same;
+  * keeps each recommendation inside the range of weekly spend the curve was fitted on, because beyond
+    the lowest and highest spend in the history the curve is extrapolating rather than describing.
 
 Standard library only. Run:  python3 optimise.py --data weekly.csv --out output/plan
 """
@@ -86,10 +88,14 @@ def analyse(campaigns: dict, args) -> dict:
         spends = [r["spend"] for r in rows]
         variation = statistics.pstdev(spends) / statistics.mean(spends) if statistics.mean(spends) else 0.0
         curve = fit_curve(rows)
+        fitted_spend = [r["spend"] for r in rows if r["spend"] > 0 and r["conversions"] > 0]
         c = {"platform": platform, "campaign": name, "weeks": len(rows), "current": current,
              "spend_total": spend_total, "conversions_total": conv_total,
              "average_cost": spend_total / conv_total if conv_total else None,
-             "spend_variation": variation, **curve, "status": "optimise", "reasons": []}
+             "spend_variation": variation, **curve,
+             "observed_min": min(fitted_spend) if fitted_spend else None,
+             "observed_max": max(fitted_spend) if fitted_spend else None,
+             "status": "optimise", "reasons": []}
         waste_window = rows[-args.waste_weeks:]
         if sum(r["conversions"] for r in waste_window) == 0 and sum(r["spend"] for r in waste_window) > 0:
             c["status"] = "waste"
@@ -111,8 +117,17 @@ def analyse(campaigns: dict, args) -> dict:
         results.append(c)
 
     opt = [c for c in results if c["status"] == "optimise"]
+    allow_extrapolation = getattr(args, "allow_extrapolation", False)
     for c in opt:
         c["lo"], c["hi"] = c["current"] * (1 - args.max_change), c["current"] * (1 + args.max_change)
+        c["lo_limit"] = c["hi_limit"] = "change limit"
+        if not allow_extrapolation:
+            # the curve is only known between the lowest and highest weekly spend it was fitted on
+            floor, ceiling = min(c["observed_min"], c["current"]), max(c["observed_max"], c["current"])
+            if floor > c["lo"]:
+                c["lo"], c["lo_limit"] = floor, "history"
+            if ceiling < c["hi"]:
+                c["hi"], c["hi_limit"] = ceiling, "history"
         c["recommended"] = c["current"]
     if args.reallocate_waste:
         released = sum(c["current"] for c in results if c["status"] == "waste")
@@ -120,7 +135,9 @@ def analyse(campaigns: dict, args) -> dict:
             # share released budget across optimisable campaigns in proportion to current spend, within limits
             base = sum(c["current"] for c in opt)
             for c in opt:
-                c["hi"] = max(c["hi"], c["current"] + released * c["current"] / base)
+                needed = c["current"] + released * c["current"] / base
+                if needed > c["hi"]:
+                    c["hi"], c["hi_limit"] = needed, "released budget"
                 c["recommended"] += released * c["current"] / base
     step = args.step
     for _ in range(100000):
@@ -143,6 +160,19 @@ def analyse(campaigns: dict, args) -> dict:
             c["marginal_after"] = marginal_cost(c, c["recommended"])
         else:
             c["recommended"] = 0.0 if (c["status"] == "waste" and args.reallocate_waste) else c["current"]
+    for c in opt:
+        # stopped by the edge of the history: no room for another step that way, although the marginal costs
+        # say the money would still have moved (same 1% tolerance as the optimiser)
+        others = [o["marginal_after"] for o in opt if o is not c]
+        c["history_edge"] = None
+        if others and c["hi_limit"] == "history" and c["recommended"] + step > c["hi"] + 1e-9 \
+                and 1.01 * c["marginal_after"] < max(others):
+            c["history_edge"] = "highest"
+        elif others and c["lo_limit"] == "history" and c["recommended"] - step < c["lo"] - 1e-9 \
+                and c["marginal_after"] > 1.01 * min(others):
+            c["history_edge"] = "lowest"
+        c["beyond_history"] = (c["recommended"] > c["observed_max"] + 0.5
+                               or c["recommended"] < c["observed_min"] - 0.5)
     budget = sum(c["current"] for c in opt)
     conv_now = sum(c["conv_now"] for c in opt)
     conv_after = sum(c["conv_after"] for c in opt)
@@ -176,9 +206,30 @@ def render_markdown(r: dict, cur: str) -> str:
         change = c["recommended"] / c["current"] - 1
         lines.append(f"| {c['platform']} | {c['campaign']} | {m(c['current'])} | {m(c['recommended'])} | "
                      f"{change:+.0%} | {m(c['average_cost'])} | {m(c['marginal_now'])} → {m(c['marginal_after'])} |")
+    extrapolating = r["settings"].get("allow_extrapolation", False)
     lines += ["", "The last column is the one that matters: budget moves from where the next conversion is most "
-              "expensive to where it is cheapest, until the two meet or a campaign reaches its change limit "
-              f"({r['settings']['max_change']:.0%} up or down).", ""]
+              "expensive to where it is cheapest, until the two meet or a campaign reaches its limits "
+              f"({r['settings']['max_change']:.0%} up or down"
+              + (", and no further than the lowest or highest weekly spend in its history)." if not extrapolating
+                 else ")."), ""]
+    edge = [c for c in opt if c.get("history_edge")]
+    if edge:
+        lines += ["**Stopped at the edge of its history.** Beyond the lowest and highest weekly spend a campaign has "
+                  "actually run at, the curve has no weeks to learn from, so a prediction there would be a guess:", ""]
+        for c in edge:
+            bound = c["observed_max"] if c["history_edge"] == "highest" else c["observed_min"]
+            lines.append(f"- **{c['platform']}: {c['campaign']}** stopped at {m(c['recommended'])} a week; the "
+                         f"{c['history_edge']} weekly spend in its history is {m(bound)}.")
+        lines += ["", "To learn whether a bigger move would pay, test a step past that edge for 2 weeks, keeping "
+                  "everything else fixed, then rerun with the new weeks added.", ""]
+    beyond = [c for c in opt if c.get("beyond_history")]
+    if beyond:
+        lines += ["**Beyond the spend levels in its history.** The curve has no weeks to learn from at this level, so "
+                  "the prediction is a guess rather than an estimate; treat the move as a test:", ""]
+        for c in beyond:
+            lines.append(f"- **{c['platform']}: {c['campaign']}** at {m(c['recommended'])} a week (history: "
+                         f"{m(c['observed_min'])} to {m(c['observed_max'])}).")
+        lines.append("")
     lowest_avg = min(opt, key=lambda c: c["average_cost"]) if opt else None
     if lowest_avg and lowest_avg["recommended"] < lowest_avg["current"] * 1.01:
         lines += [f"Note **{lowest_avg['campaign']}**: it has the lowest average cost ({m(lowest_avg['average_cost'])}) "
@@ -187,8 +238,10 @@ def render_markdown(r: dict, cur: str) -> str:
     for c in opt:
         if "brand" in c["campaign"].lower() and c["recommended"] > c["current"] * 1.05:
             lines += [f"Check before increasing **{c['platform']}: {c['campaign']}**: brand search is limited by how "
-                      "many people search for you. If impression share is already high (above about 90%), extra "
-                      "budget mostly raises cost per click rather than conversions, and the curve cannot see that.", ""]
+                      "many people search for you. Look at Search lost impression share (budget): how often the ads "
+                      "were not shown because the budget was too low. If it is close to zero, budget is not what "
+                      "holds this campaign back, so the extra conversions the curve predicts are unlikely to appear, "
+                      "and the curve cannot see that.", ""]
     if hold:
         lines += ["## Held at current budget", "",
                   "The history cannot support a reliable recommendation for these campaigns:", ""]
@@ -203,7 +256,9 @@ def render_markdown(r: dict, cur: str) -> str:
                          "Check conversion tracking first; if tracking is sound, pause or rebuild it.")
         lines.append("")
     lines += ["## Before acting", "",
-              "- Move budget in 2 steps, a fortnight apart, and compare actual results with the prediction.",
+              "- Move budget in 2 steps and compare actual results with the prediction before taking the second. "
+              "Judge each step over 2 weeks or 2 conversion cycles, whichever is longer, allowing for conversions "
+              "that are reported late.",
               "- The curves describe the past. Seasonality, new creative, bidding changes or a competitor's push "
               "can all change them.",
               "- Conversions are only comparable if every platform counts them the same way, with similar "
@@ -224,6 +279,9 @@ def main() -> None:
     ap.add_argument("--min-r2", type=float, default=0.30, help="Minimum fit quality, R squared (default 0.30)")
     ap.add_argument("--waste-weeks", type=int, default=4, help="Weeks without conversions that count as waste (default 4)")
     ap.add_argument("--reallocate-waste", action="store_true", help="Move budget from waste campaigns into the plan")
+    ap.add_argument("--allow-extrapolation", action="store_true",
+                    help="Let recommendations go beyond the lowest and highest weekly spend in each campaign's "
+                         "history, where the curve is extrapolating (not recommended)")
     args = ap.parse_args()
     result = analyse(load(args.data), args)
     report = render_markdown(result, args.currency)
