@@ -39,7 +39,7 @@ Cover these areas, searching each one separately (a combined query returns shall
 1. **Paid media:** LinkedIn, Google, Meta, Microsoft and TikTok libraries as relevant. For each, record: number of live ads, formats, run dates where shown, messaging themes, offers (demo, trial, report, webinar, event, discount), calls to action and landing pages.
 2. **Organic social:** platforms, follower counts, posting cadence over the last 30 to 90 days, content themes, formats, engagement relative to audience size, and leadership voices.
 3. **Website and landing pages:** positioning, proof, conversion path and friction, content engine and cadence, messaging changes over time.
-4. **Search presence:** whether they appear for core category terms, size of the content library, who shows up for their brand name.
+4. **Search presence:** whether they appear for core category terms, size of the content library, who shows up for their brand name, and their share of search against the competitor set (Google Trends).
 5. **Third-party coverage:** press and trade media, reviews, podcasts, forums, analyst mentions.
 6. **Other demand signals:** job postings (often the most revealing source), technology stack, events and sponsorships, partnerships.
 
@@ -47,17 +47,18 @@ When a source cannot be reached from this session (sign-in walls, script-heavy p
 
 ## 4. Audit: judge performance from public proxies
 
-Public data almost never shows spend, conversion rates or pipeline. Use proxies, and name the proxy each time you rely on one:
+Public data almost never shows spend, conversion rates or pipeline. Use proxies, and name the proxy each time you rely on one. Read `references/demand-proxies.md` before using share of search, the in-market lens or buying situations: it holds the method, the evidence and the limits for each.
 
 - **Ad longevity:** creative that has run for 60 to 90 days or more has probably survived testing; advertisers usually switch off losers quickly. (Only measurable where run dates are shown.)
 - **Creative volume and variation:** many variants of one message suggests active testing; one ad running alone suggests a set-and-forget account.
 - **Message consistency:** the same promise across ads, landing page, social and sales materials indicates mature positioning. Mismatch between an ad and its landing page is a conversion leak.
-- **Funnel coverage:** whether they only capture existing demand (search, retargeting, demo-request ads) or also create it (thought leadership, video, events, category education). Most companies over-invest in capture.
+- **Share of search:** the company's share of brand searches within its competitor set. Published research links it to market share, and in some categories it has moved ahead of market share. Report its direction and standing only; never turn it into a market share figure.
+- **Funnel coverage:** whether they only capture existing demand (search, retargeting, demo-request ads) or also reach the far larger group not buying yet (brand advertising, video, events, category education). Where purchase cycles run to years, only a small share of buyers is in the market at any time, so a capture-only programme is a finding. Judge it against the category's purchase cycle, not a fixed ratio.
 - **Conversion path friction:** form length, steps to a sales conversation, whether pricing or a trial is available.
 - **Engagement relative to audience:** reactions and comments against follower count, and the quality of comments.
 - **Review momentum:** volume and recency on review sites; sudden bursts indicate campaigns.
 - **Hiring:** marketing roles being added, and which channels they name.
-- **Share of voice:** how often they appear in trade press and category searches relative to the competitors you come across.
+- **Share of mentions:** how often they appear in trade press and category searches relative to the competitors you come across. Avoid calling it share of voice: in effectiveness research that term means share of category advertising spend, which public sources do not show.
 
 For each channel give a clear verdict (strong, adequate, weak, or absent) and the reason. Treat a missing channel as a finding when competitors in the same industry are active there; otherwise just note it.
 
@@ -65,12 +66,14 @@ Traps to avoid:
 - Reading absence from an ad library as absence of advertising. Check the legal name, the domain and an EU country filter first.
 - Treating an impressions band as spend, or follower count as reach.
 - Drawing trend conclusions from a single snapshot. Say it is a snapshot.
+- Reading a Google Trends value of 0 as no demand. Low-volume brands show as 0; record share of search as not measurable.
 
 ## 5. Synthesise the strategy
 
 Connect the channels into one coherent read. Answer:
 - What is their demand generation strategy in a sentence? Who are they going after, with what promise, through which channels, toward which conversion?
 - Where does the system hang together, and where does it break (for example: strong paid acquisition pointing at a weak landing page; heavy content production with no distribution)?
+- Which buying situations (category entry points) does the messaging tie the brand to, how wide is that set, and which situations do competitors claim that this company leaves open? Messaging shows what the company is aiming for, not what buyers remember, so label this as inferred.
 - What do the choices reveal about their priorities, budget level and team maturity? Mark these as inference.
 
 ## 6. Apply it to the role and industry
@@ -133,4 +136,4 @@ Three to five prioritised moves, each tied to a finding.
 Every source cited, as linked titles.
 ```
 
-Before finishing, check: every recommendation traces to a finding; every inference is labelled with its signal; every number has a source; nothing claims knowledge of spend, keywords or conversion rates that the sources do not show.
+Before finishing, check: every recommendation traces to a finding; every inference is labelled with its signal; every number has a source; Google Trends values appear as relative figures, never as search volumes or market share; nothing claims knowledge of spend, keywords or conversion rates that the sources do not show.

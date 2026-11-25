@@ -35,8 +35,9 @@ Say which channels you could and could not reach near the top of the briefing, n
 
 ### Google Ads Transparency Center — adstransparency.google.com
 - **Search by:** advertiser name or website only. There is no keyword search.
-- **Covers:** Search, YouTube, Display and Gmail ads from roughly the past year.
-- **Shows:** creative and its variations, format, the date an ad was last shown, regions shown. Selecting an EU region adds more detail, such as ranges for how many times an ad was shown.
+- **Covers:** ads served on Google platforms; Google's help names Search, Display, Gmail and YouTube as examples. Google does not publish a fixed look-back period (its help says only "a certain time period"), so record the earliest date the tool shows rather than assuming a window.
+- **Shows:** creative and its variations, format, the date an ad was last shown, regions shown, and the advertiser's name, location and payer, with a verified or unverified badge.
+- **Shows only for ads in certain countries, including European Union member states:** targeting information, the total number of recipients of each ad, and a subject label that Google sometimes generates. Select one of these countries to see it.
 - **Does not show:** keywords, bids, budgets or the search terms that triggered an ad. Never claim to know a company's keywords from this tool; ad copy only hints at the topic.
 - **Watch for:** ads listed under a legal entity or agency payer name. If the brand name returns nothing, try the domain and the registered company name before concluding there are no ads.
 
@@ -81,6 +82,7 @@ Engagement read: a high follower count with single-digit reactions per post usua
 - **Conversion path:** how many steps from homepage to a sales conversation or sign-up; form length; whether pricing is public. This tells you whether the motion is product-led, sales-led or hybrid.
 - **Content engine:** blog or resource hub publishing cadence (read dates on the index page), gated content (reports, guides), webinars, newsletters.
 - **Search presence without paid tools:** run searches for the company's core category terms and note whether the company appears on page one; run "site:" searches to gauge the size of the content library; check whether competitors appear for the company's own brand name.
+- **Share of search:** a Google Trends comparison of the company against its competitor set. Follow the method and limits in `demand-proxies.md`; low-volume brands show as 0 and are recorded as not measurable.
 - **Messaging history:** the Wayback Machine (web.archive.org) shows how the homepage headline and positioning have changed. A recent repositioning is a strong strategic signal.
 
 ## 5. Third-party coverage
