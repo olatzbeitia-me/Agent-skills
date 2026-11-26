@@ -69,11 +69,11 @@ Read only the sections for channels in play. Each item gives what to check and w
 
 ## 6. Meta (Facebook, Instagram)
 
-- **Structure**: Advantage+ is now the default set-up for new Sales, Leads and App campaigns, with manual controls as optional overrides. Fewer, consolidated campaigns and ad sets generally learn faster; fragmented structures starve each ad set of signal.
+- **Structure**: a Sales, Leads or App campaign counts as Advantage+ only while all 3 automation levers are on: Advantage+ campaign budget, Advantage+ audience in at least one ad set, and Advantage+ placements in every ad set (placement exclusions set at account level don't switch it off). Check which levers each campaign uses and why any are off, rather than assuming a newer campaign is Advantage+ (see `channels/meta.md`). Fewer, consolidated campaigns and ad sets generally learn faster; fragmented structures starve each ad set of signal.
 - **Creative is the targeting**: Meta's delivery system uses the creative itself to find audiences, and broad audience settings are treated as suggestions. The lever is a library of conceptually different creative (different hooks, angles, formats and people), not small variations of one idea. Check concept count, format coverage (vertical video, static, carousel), and fatigue (rising frequency with falling click-through rate).
 - **Signal**: pixel plus Conversions API, deduplicated; event match quality; the right optimisation event (purchase versus add to cart; qualified lead versus any lead).
 - **Lead ads**: instant forms produce high volume and variable quality. Check for qualifying questions, "higher intent" form type, customer relationship management system feedback, and the downstream qualification rate.
-- **Existing customers**: check budget caps or settings for existing versus new customers so spend isn't mostly retargeting buyers who would return anyway.
+- **Existing customers**: check that something limits spend on buyers who would return anyway. The old existing-customer budget cap isn't available in new Advantage+ campaigns; Meta's documented replacement is 2 ad sets, one for existing customers with a spending limit and one that excludes them.
 - **Attribution settings**: confirm the window and whether view-through is included before comparing periods; default or setting changes break like-for-like comparisons.
 - **Regulated categories**: financial products, health, housing, employment and others have restricted targeting and, in some markets, restricted optimisation events. Check current rules for the markets in play.
 

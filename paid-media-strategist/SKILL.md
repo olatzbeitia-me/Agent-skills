@@ -39,7 +39,7 @@ From what the person gives you, plus the company's own website, pricing page, pr
 If the person mentions why they're asking (an interview, a pitch, a new role, their own business), shape the emphasis to suit. For an interview, a sharp point of view on the company's market and marketing is worth more than breadth.
 
 ### 2. Research the market
-Read `references/market-research.md` and work through it: category size and direction from credible sources, the forces changing the market now, who the buyers are and how they search, compare and decide, the language they use, the moments that trigger a purchase, and the regulation that shapes what can be said.
+Read `references/market-research.md` and work through it: category size and direction from credible sources, the forces changing the market now, who the buyers are and how they search, compare and decide, how often they buy (and so how many are in the market at any one time), the language they use, the moments that trigger a purchase, and the regulation that shapes what can be said.
 
 ### 3. Map the competitors' advertising, with pictures and links
 Read `references/competitor-research.md`. Check the public ad libraries directly when a browser is available (Google Ads Transparency Centre, Meta Ad Library, LinkedIn Ad Library), starting with the company itself and its two or three closest competitors. Record what each is running, on which channels, with which angles, formats and offers, and where each is absent. Date every observation.
@@ -50,9 +50,19 @@ As you go, **capture the evidence**: for the three to eight ads that best show e
 For every channel that could plausibly suit this business, read its primer in `references/channels/`, then check its official news sources (listed in each primer and in `references/sources.md`) for anything that changes the picture: new formats, retired features, market availability, policy changes in this category. Three to eight checks is typical. Use the primer's "Recent developments" as a starting point, never as a substitute for checking.
 
 ### 5. Develop the ideas
-Use the idea framework in `references/market-research.md`. Aim for five to eight ideas spread across types (channel, audience, message, format, offer, timing, a way to learn), each traced to evidence, each fitted to a channel because of how that channel works. Note what each would take and how you'd know it was working, briefly. Then list ideas you considered and dropped, one line each with the reason.
+Use the idea framework in `references/market-research.md`. Aim for five to eight ideas spread across types (channel, audience, message, format, offer, timing, a way to learn), each traced to evidence, each fitted to a channel because of how that channel works. Label each idea brand-building (reaching future buyers) or activation (converting buyers in the market now), and check the set against how many buyers are in the market: a set that is all activation needs a reason. Note what each would take and how you'd know it was working, briefly. Then list ideas you considered and dropped, one line each with the reason.
 
 ### 6. Write the report
+Follow the report structure below, in a format that shows the screenshots (see "Delivering a report with pictures").
+
+### 7. Check before delivering
+Go through this list against the draft. Fix anything that fails and go through it again; deliver only when every item passes, or when a gap that can't be closed is stated under "Gaps in the research".
+- Every idea links to the evidence it rests on, states its role, and would not read the same for a different company.
+- Every platform feature, format or market availability an idea depends on was confirmed at the platform's own source during this research and is dated; otherwise it is labelled reported, or the idea is dropped.
+- Every ad mentioned has a screenshot and a direct library link, or is listed as missing.
+- No figure about the business is invented; derived figures show their arithmetic; no benchmark is quoted from memory.
+- "Reported", "(inference)" and "assumed" are used where, and only where, they apply.
+- It is still a research report with ideas: no timeline, owners, effort scores or budget split have crept in.
 
 ## Report structure
 
@@ -82,7 +92,7 @@ Access: [one line on what you could and couldn't see]
 [For each relevant channel: fit, how it would be used here, latest developments from official sources, availability in this market]
 
 ## Ideas
-[Strongest first. For each: the idea; the evidence it rests on, linking to the specific ads and sources; channel and format, and why that channel; what it would take; how you'd know it was working; caveats]
+[Strongest first. For each: the idea and its role (brand-building or activation); the evidence it rests on, linking to the specific ads and sources; channel and format, and why that channel; what it would take; how you'd know it was working; caveats]
 
 ## Ideas considered and dropped
 [One line each, with the reason]
