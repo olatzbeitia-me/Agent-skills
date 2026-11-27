@@ -26,40 +26,41 @@ Each item: what goes wrong, why, and how to prevent it. Grouped by area. Skim th
 ## Salesforce side
 
 16. **Uninstalling the package deletes `pi__` fields and values**, and breaks every report, formula and flow using them. *Prevent:* copy to legacy fields; repoint dependencies; uninstall last.
-17. **Engagement History goes blank.** Sales loses the Pardot activity view on records. *Prevent:* install the HubSpot integration card on layouts and choose activity-to-task sync before cutover; tell sales.
+17. **Engagement History goes blank.** Sales loses the Pardot activity view on records. *Prevent:* add HubSpot Embed to lead and contact layouts (accounts and opportunities too if they sync), give every salesperson who needs it a HubSpot login, and choose activity-to-task sync before cutover; tell sales that HubSpot Embed does not work in mobile apps.
 18. **Flows that exclude the Pardot integration user** run on HubSpot changes and loop or overwrite. *Prevent:* search flows, Apex and validation rules for the B2BMA Integration User and add the HubSpot integration user.
 19. **Validation rules and required fields reject HubSpot-created leads.** Pardot side-stepped some with placeholders. *Prevent:* sandbox test with minimal records; supply defaults or exempt the integration user.
 20. **Integration user cannot see records** because of sharing rules, so they never sync. *Prevent:* view-all on synced objects for the integration user.
 21. **Task volume explosion** from syncing email opens and sends as tasks, with no deduplication. *Prevent:* sync form submissions and clicks only.
 22. **Two connectors writing the same fields** during parallel running. *Prevent:* one writer per field; HubSpot read-only until cutover; pause Pardot connector before HubSpot writes.
-23. **Queue-owned leads** have no HubSpot owner equivalent; owner-based segments and notifications miss them. *Prevent:* test and design around queues.
+23. **A paused connector is not a frozen Pardot.** Campaigns, users and metadata keep syncing, and the Send to Pardot button still pushes single leads and contacts into Pardot, where its automation can still act on them. *Prevent:* hide Send to Pardot on layouts at the freeze; test resume behaviour in a sandbox before relying on it for rollback (`pardot-model.md` §12).
+24. **Queue-owned leads** have no HubSpot owner equivalent; owner-based segments and notifications miss them. *Prevent:* test and design around queues.
 
 ## Automation
 
-24. **Retroactivity mismatch.** Pardot automation rules act on everyone who matches; a HubSpot workflow switched on with "enrol existing" can re-send emails or re-stamp values on thousands of records. *Prevent:* decide enrolment of existing records per workflow; default no.
-25. **Duplicate nurture emails** when Pardot programmes drain while HubSpot workflows start. *Prevent:* suppress HubSpot enrolment for people still in Pardot programmes.
-26. **Building on the legacy HubSpot score.** It was retired in August 2025. *Prevent:* use the Lead scoring tool only.
-27. **Open-based branching** rewards machine opens. *Prevent:* branch on clicks and form actions.
-28. **Literal port of every rule.** Imports years of clutter. *Prevent:* triage first.
+25. **Retroactivity mismatch.** Pardot automation rules act on everyone who matches; a HubSpot workflow switched on with "enrol existing" can re-send emails or re-stamp values on thousands of records. *Prevent:* decide enrolment of existing records per workflow; default no.
+26. **Duplicate nurture emails** when Pardot programmes drain while HubSpot workflows start. *Prevent:* suppress HubSpot enrolment for people still in Pardot programmes.
+27. **Building on the legacy HubSpot score.** It was retired in August 2025. *Prevent:* use the Lead scoring tool only.
+28. **Open-based branching** rewards machine opens. *Prevent:* branch on clicks and form actions.
+29. **Literal port of every rule.** Imports years of clutter. *Prevent:* triage first.
 
 ## Web and tracking
 
-29. **Unknown Pardot embeds** on microsites, partner pages and PDFs break silently. *Prevent:* crawl and search off-site; monitor 404s after repointing.
-30. **Collected forms miss hidden fields and JavaScript forms**, so UTMs and campaign values disappear. *Prevent:* Forms API or HubSpot forms.
-31. **CAPTCHA-enabled HubSpot forms reject Forms API submissions.** *Prevent:* handle bot protection on the site side for API-posted forms.
-32. **Repointing the tracker domain too early** kills live Pardot assets during drain. *Prevent:* move it only after drain and the 30-day unsubscribe window, or after everything on it is redirected.
-33. **Cookie policy and consent platform not updated** for HubSpot cookies. *Prevent:* include in web change list; test consent behaviour.
+30. **Unknown Pardot embeds** on microsites, partner pages and PDFs break silently. *Prevent:* crawl and search off-site; monitor 404s after repointing.
+31. **Collected forms miss hidden fields and JavaScript forms**, so UTMs and campaign values disappear. *Prevent:* Forms API or HubSpot forms.
+32. **CAPTCHA-enabled HubSpot forms reject Forms API submissions.** *Prevent:* handle bot protection on the site side for API-posted forms.
+33. **Repointing the tracker domain too early** kills live Pardot assets during drain. *Prevent:* move it only after drain and the 30-day unsubscribe window, or after everything on it is redirected.
+34. **Cookie policy and consent platform not updated** for HubSpot cookies. *Prevent:* include in web change list; test consent behaviour.
 
 ## Reporting
 
-34. **Original source shows "offline" for every migrated contact.** *Prevent:* legacy first-touch properties and a unified first-touch field.
-35. **Account Engagement attribution models and analytics datasets stop.** *Prevent:* move to Salesforce's customizable campaign influence or HubSpot attribution; snapshot dashboards before cutover.
-36. **Engagement metrics start from zero** in HubSpot. *Prevent:* set expectations; use legacy summary properties.
+35. **Original source shows "offline" for every migrated contact.** *Prevent:* legacy first-touch properties and a unified first-touch field.
+36. **Account Engagement attribution models and analytics datasets stop.** *Prevent:* move to Salesforce's customizable campaign influence or HubSpot attribution; snapshot dashboards before cutover.
+37. **Engagement metrics start from zero** in HubSpot. *Prevent:* set expectations; use legacy summary properties.
 
 ## Contract and platform
 
-37. **Pardot data deleted after deprovisioning** (reported around 90 days). *Prevent:* finish exports early; get the retention period in writing.
-38. **No overlap negotiated**, removing rollback and drain options. *Prevent:* negotiate overlap in Phase 0.
-39. **HubSpot hosted in the wrong region**; EU-hosted accounts cannot move out. *Prevent:* data protection sign-off before portal creation.
-40. **Other tools post to Pardot** (webinar, events, chat, enrichment, custom API) and silently stop delivering leads. *Prevent:* inventory integrations and API users; repoint each to HubSpot or Salesforce.
-41. **Sales-side Pardot features disappear** (Pardot emails sent by sales from Salesforce, engagement alerts). *Prevent:* identify users; provide HubSpot sales email or Salesforce alternatives.
+38. **Pardot data unrecoverable after termination.** Salesforce's published terms allow 30 days to request a data return and delete inactive data after 90, so planning around the 90 days misses the real deadline. *Prevent:* finish and check exports before the contract ends; diary the 30-day request deadline; confirm the contract's terms with the account team (`pardot-model.md` §15).
+39. **No overlap negotiated**, removing rollback and drain options. *Prevent:* negotiate overlap in Phase 0.
+40. **HubSpot hosted in the wrong region**; EU-hosted accounts cannot move out. *Prevent:* data protection sign-off before portal creation.
+41. **Other tools post to Pardot** (webinar, events, chat, enrichment, custom API) and silently stop delivering leads. *Prevent:* inventory integrations and API users; repoint each to HubSpot or Salesforce.
+42. **Sales-side Pardot features disappear** (Pardot emails sent by sales from Salesforce, engagement alerts). *Prevent:* identify users; provide HubSpot sales email or Salesforce alternatives.

@@ -27,7 +27,7 @@ A phased checklist. Adapt durations to the client's volumes and contract dates; 
 ## 2. Phase 0 – Discovery and contract
 
 - [ ] Answer the discovery questions (`discovery-questions.md`); record answers in the decision log.
-- [ ] Confirm Pardot contract end date and negotiate **overlap** (recommended: at least 60–90 days after planned cutover, covering drain, the 30-day unsubscribe window and rollback). Get the post-termination data-retention period in writing.
+- [ ] Confirm Pardot contract end date and negotiate **overlap** (recommended: at least 60–90 days after planned cutover, covering drain, the 30-day unsubscribe window and rollback). Confirm the post-termination terms with the Salesforce account team: Salesforce's published documentation gives 30 days after termination to request a data return, and deletes the data after 90 (`pardot-model.md` §15).
 - [ ] Confirm HubSpot tiers and add-ons, and **data-hosting location** before the portal is created. **Irreversible** for EU hosting.
 - [ ] Name owners: Salesforce admin, HubSpot admin, web, data protection, sales operations, an executive sponsor who can approve go/no-go.
 
@@ -52,6 +52,8 @@ Gate: designs signed off by owners.
 - [ ] HubSpot properties, subscription types, segments, scoring, workflows (all **off**), email templates, forms, landing pages.
 - [ ] Integration installed against the **Salesforce sandbox**; mappings configured; end-to-end tests with named test records (new lead, existing contact, duplicate email, opted out, Do Not Email, hard bounce, mid-nurture, lead conversion, owner assignment, campaign membership).
 - [ ] Salesforce changes in sandbox: legacy fields for `pi__` values, flows updated to recognise the HubSpot integration user, duplicate rules, validation rule review, integration user and permission set.
+- [ ] HubSpot Embed added to sandbox lead and contact layouts (`hubspot-salesforce-integration.md` §9); list the sales users who will need a HubSpot login to see it.
+- [ ] In the sandbox, pause and resume the Pardot connector with test edits made in between, and record whether those edits sync on resume. The rollback matrix depends on the answer.
 - [ ] Email sending domain authenticated in HubSpot (DNS can be added early; it does not affect Pardot). Check SPF lookup count.
 - [ ] HubSpot tracking code added to the website alongside Pardot (with consent handling) to start building visitor history.
 - [ ] Start Export API jobs for Pardot visitor-activity history (long-running).
@@ -89,14 +91,14 @@ Gate: go/no-go meeting — warm-up metrics healthy, runbook rehearsed, rollback 
 Shape of the day (adapt times; pick a Tuesday or Wednesday, never a Friday):
 
 1. **T-1 day**: lower DNS time-to-live on the tracker domain (if it moves this week); final Pardot exports (prospects, lists, recent activity); snapshot dashboards; schedule the final copy of `pi__` values into legacy fields for straight after step 3, when the values stop changing.
-2. **Freeze**: stop new entries into Engagement Studio programmes that will drain (adjust recipient-list feeding rules); pause Pardot automation rules that write to Salesforce; schedule no Pardot list emails from now on.
-3. **Pause the Pardot connector.** From this point Pardot writes nothing to Salesforce. Reversible while Pardot is licensed — but confirm what happens to changes made in Salesforce while paused before relying on unpausing (Verify).
+2. **Freeze**: stop new entries into Engagement Studio programmes that will drain (adjust recipient-list feeding rules); pause Pardot automation rules that write to Salesforce; schedule no Pardot list emails from now on; hide the Send to Pardot button on lead and contact layouts, because it still pushes single records into Pardot while the connector is paused.
+3. **Pause the Pardot connector** (Pause Sync on the Connectors page). From this point prospect data, campaign members, opportunities and email tasks stop flowing between Pardot and Salesforce; campaigns, users and metadata keep syncing (`pardot-model.md` §12). Reversible while Pardot is licensed — use the Phase 2 sandbox test to know whether Salesforce changes made while paused will sync on resume.
 4. **Final delta**: export Pardot opt-outs, Do Not Email and bounces since the initial load; run the opt-out import again. (Compliance)
 5. **Turn on HubSpot write paths**: set the inclusion segment to its production definition; switch mappings to their production sync rules; turn on activity sync choices.
 6. **Turn on HubSpot workflows** one group at a time, checking enrolment settings for each (enrol existing records only where intended).
 7. **Website**: publish replacement forms and form-handler code; remove Pardot dynamic-content embeds; remove the Pardot tracking script.
 8. **Repoint the tracker domain** to HubSpot with redirects already configured — or defer this until the 30-day unsubscribe window has passed (`web-tracking-and-domains.md` §6). When done: test top Pardot URLs, vanity URLs and unsubscribe paths.
-9. **Smoke tests**: submit each key form as a test contact; confirm HubSpot contact, Salesforce lead, owner, campaign membership and status, lifecycle, notification, autoresponder.
+9. **Smoke tests**: submit each key form as a test contact; confirm HubSpot contact, Salesforce lead, owner, campaign membership and status, lifecycle, notification, autoresponder, and that HubSpot Embed shows the test contact's timeline on the Salesforce record.
 10. **Hypercare**: check Sync health and Salesforce duplicate reports every few hours for the first two days.
 
 Point of no return (in practice): the first HubSpot marketing sends to the broad database plus new website submissions arriving only in HubSpot. After that, rollback means replaying HubSpot data into Pardot.
@@ -123,15 +125,15 @@ Order matters; each step depends on the previous.
 5. [ ] Uninstall the Pardot managed package. **Irreversible / Data loss** — deletes `pi__` fields and values.
 6. [ ] Remove Pardot SPF include and DKIM records; remove gateway allow-listing.
 7. [ ] Update cookie policy and privacy notice; remove Pardot from the record of processing activities and sub-processor list.
-8. [ ] Close the Pardot contract; diary the reported data-deletion date and confirm with Salesforce afterwards.
+8. [ ] Close the Pardot contract; diary the 30-day deadline for requesting a data return and the 90-day deletion date, and confirm deletion with Salesforce afterwards.
 
 ## 10. Rollback matrix
 
 | If the problem appears… | Rollback | Cost |
 |---|---|---|
 | Before connector pause | Abandon cutover for the day; nothing changed in Salesforce | None |
-| After connector pause, before HubSpot write paths on | Unpause Pardot connector (Verify queued-change behaviour first) | Low |
-| After HubSpot write paths on, before broad HubSpot sends | Clear inclusion segment / set mappings to Don't sync; turn off workflows; unpause Pardot connector; republish Pardot forms; point the tracker domain back if moved | Medium: reconcile records HubSpot created or changed in Salesforce (report on last-modified-by HubSpot integration user) |
+| After connector pause, before HubSpot write paths on | Resume the Pardot connector; check Marketing Data Sharing rules first if used; if the sandbox test showed paused-period changes do not sync on resume, bring the affected records back into line (Send to Pardot works for small numbers) | Low |
+| After HubSpot write paths on, before broad HubSpot sends | Clear inclusion segment / set mappings to Don't sync; turn off workflows; resume Pardot connector; republish Pardot forms; point the tracker domain back if moved | Medium: reconcile records HubSpot created or changed in Salesforce (report on last-modified-by HubSpot integration user) |
 | After broad HubSpot sends and new submissions in HubSpot | Fix forward in HubSpot; full rollback means exporting HubSpot unsubscribes, new contacts and activity into Pardot | High — avoid; design go/no-go to catch problems earlier |
 | After package uninstall or Pardot deprovisioned | No rollback | — |
 

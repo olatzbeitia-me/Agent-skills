@@ -7,7 +7,7 @@ Use this when client-specific facts are missing. Ask only the questions that cha
 **Licences and contracts**
 - Which Pardot edition, and how many business units? (Feature availability; one or several HubSpot designs)
 - When does the Pardot contract end, and what notice period applies? Can we overlap 60–90 days? (Drain, rollback, unsubscribe window)
-- What is Salesforce's stated data-retention period after termination? (Export deadline)
+- Do the contract's post-termination terms match Salesforce's published ones: 30 days to request a data return, deletion after 90? (Export deadline)
 - Which HubSpot hubs and tiers, and which add-ons (Brands, transactional email, dedicated IP, extra marketing contacts)? (What can be rebuilt natively)
 - Has the HubSpot portal been created yet, and where is data hosted? (Irreversible hosting choice)
 - Do we have HubSpot sandboxes and a Salesforce full or partial sandbox? (Test approach)
@@ -21,6 +21,8 @@ Use this when client-specific facts are missing. Ask only the questions that cha
 - Which lead assignment rules, queues and routing tools are used? (Owner design)
 - Which flows, Apex, validation rules and reports reference `pi__` fields or the B2BMA Integration User? (Dependency work)
 - Are duplicate rules active for leads and contacts? (Clean-up and prevention)
+- Who in sales reads Engagement History on records today, and does anyone rely on the Salesforce mobile app for it? (HubSpot Embed needs a HubSpot login per viewer and does not work in mobile apps)
+- Is the Send to Pardot button on lead and contact layouts, and who uses it? (It still pushes records into Pardot while the connector is paused)
 
 **Volumes**
 - Pardot: total prospects, mailable prospects, prospects without a CRM ID, prospects in the recycle bin, emails shared by more than one prospect.
