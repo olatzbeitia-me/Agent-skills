@@ -132,5 +132,5 @@ Write each decision into the field-mapping workbook (`assets/field-mapping-templ
 | Kiosk / data entry mode forms | Separate form used only on staff devices, or entering contacts directly in the CRM | No cookie suppression switch equivalent (Verify current form options) |
 | Repeating automation rules (match every N days) | Workflow re-enrolment on a date property, or schedule-based enrolment | Re-enrolment triggers are narrower than Pardot criteria (Verify available triggers) |
 | Scoring categories by campaign folder | Multiple engagement scores, each filtered to the relevant assets | Number of scores limited by tier (Depends) |
-| Engagement History in Salesforce | HubSpot's Salesforce integration card on Salesforce layouts, plus activity sync to Salesforce tasks | Different look; task sync creates volume (`hubspot-salesforce-integration.md` §9) |
+| Engagement History in Salesforce | HubSpot Embed on Salesforce page layouts, plus activity sync to Salesforce tasks | Each viewer needs a HubSpot login; does not work in mobile apps; task sync creates volume (`hubspot-salesforce-integration.md` §9) |
 | Account Engagement multi-touch attribution models in Salesforce | Salesforce Customizable Campaign Influence fed by HubSpot-written campaign members; HubSpot attribution reports | (Depends: Salesforce and HubSpot editions) |

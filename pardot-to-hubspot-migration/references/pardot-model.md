@@ -107,7 +107,12 @@ The detail an expert needs to audit Pardot accurately and predict what breaks wh
 
 - Runs as the **B2BMA Integration User** in Salesforce. Settings include: automatically create prospects when leads or contacts are created in Salesforce (optionally limited by **Marketing Data Sharing** rules), sync emails to Salesforce as activities, connected campaigns, Salesforce user sync, and record-deletion behaviour (a deleted Salesforce record sends the prospect to the Pardot recycle bin). (Certain; Depends: edition for Marketing Data Sharing)
 - Matching is by **CRM ID** under the duplicate-email setting; a prospect without a CRM ID matches by email to the first record Salesforce returns. (Certain)
-- The connector can be **paused**. Pausing stops sync in both directions. (Certain) Whether changes made while paused are queued and replayed on unpause, and for how long, should be confirmed before relying on it. (Verify: Salesforce Help, "pause the Account Engagement connector")
+- The connector can be **paused** by an Account Engagement administrator: Admin → Connectors (or Account Engagement Settings → Connectors in the Lightning app), then Pause Sync, and later Resume Sync. Pausing makes no permanent change and does not archive the business unit. (Certain — Salesforce Help, "Pause the Salesforce Connector v2", checked November 2026) Pausing is not a full stop:
+  - **Stops while paused:** ObjectChangeLog, custom objects, and the objects related to prospects (leads and contacts) — campaign members, opportunity contact roles, prospect accounts (Salesforce accounts), opportunities, and emails logged as Salesforce tasks. (Certain)
+  - **Keeps syncing while paused:** campaigns, users and metadata. (Certain)
+  - **Manual sync still works:** a Salesforce user can push a single lead or contact to Pardot with the **Send to Pardot** button while the connector is paused. (Certain) Hide that button on lead and contact layouts, or brief users, before relying on a pause to freeze Pardot.
+  - If Marketing Data Sharing is in use, check its sharing rules before resuming. (Certain)
+  - The help page does not say whether changes made in Salesforce while the connector is paused are picked up on resume. Test it in a sandbox before a rollback plan depends on it. (Verify)
 - Salesforce flows, validation rules and Apex in many orgs exclude changes made by the B2BMA Integration User (for example "if last modified by integration user, skip"). Each needs the HubSpot integration user added. (Certain as a pattern; Verify in the client's org)
 
 ## 13. What Pardot leaves in Salesforce
@@ -130,4 +135,8 @@ The detail an expert needs to audit Pardot accurately and predict what breaks wh
 - Landing pages, forms, files, custom redirects and vanity URLs on the tracker domain stop working; reported behaviour is that landing pages render blank. (Certain that they stop; Verify exact behaviour)
 - Unsubscribe and preference-centre links in emails already sent stop working — a compliance exposure (`web-tracking-and-domains.md` §6).
 - The connector stops; `pi__` field values stay frozen in Salesforce until the package is uninstalled.
-- **Data loss:** account data is reported to be permanently deleted around 90 days after deactivation. Get the actual retention period, and the date it starts, from the Salesforce account team in writing, and finish all exports well before it. (Verify)
+- **Data loss:** Salesforce's *Marketing Cloud Account Engagement Security, Privacy and Architecture* documentation (published 22 May 2026) sets out what happens after the contract ends:
+  - A customer can request a return of its data, as downloadable files in a structured format, only **within 30 days of contract termination**. (Certain as published)
+  - After termination the data is kept in an inactive state for 90 days, then overwritten or deleted. Encrypted off-site backups are kept for 90 days and then overwritten or deleted. (Certain as published)
+  - Salesforce reserves the right to shorten the retention period and says it will update that document if it does. (Certain as published)
+  - The 90 days are not an export window: the documented route to get data back closes at 30 days. Finish and check every export before termination, diary the 30-day request deadline, and confirm the contract's own terms with the Salesforce account team. (Verify: the version of the document current at termination, and the contract)

@@ -84,7 +84,15 @@ See `automation-rebuild.md` §7 for assignment. Integration facts: owners are ma
 
 - HubSpot can create Salesforce **tasks** for form submissions, marketing email sends, opens and clicks, sales emails, meetings, calls, notes and tasks. (Certain)
 - Opens and clicks are **not deduplicated** when sent to Salesforce: repeated opens and forwarded emails create multiple tasks. Only form submissions within one year of the contact's first sync are sent. (Certain)
-- Recommendation: sync form submissions and email clicks; do not sync opens or sends. Put the HubSpot integration card on Salesforce lead and contact layouts so sales can see full engagement without task volume. (Certain as practice; Verify card installation steps — recent changes require adding the card manually)
+- Recommendation: sync form submissions and email clicks; do not sync opens or sends. Give sales the full engagement view through HubSpot Embed (below) rather than through task volume. (Certain as practice)
+
+**HubSpot Embed: the replacement for Engagement History** (HubSpot knowledge base, checked November 2026)
+
+- HubSpot Embed is a window inside Salesforce records that shows the record's HubSpot timeline, property history and workflow enrolments, and lets users enrol the record in a workflow or sequence and book meetings. It is the closest equivalent to Pardot's Engagement History components. HubSpot is deprecating its legacy managed package and the Visualforce module inside it; use HubSpot Embed instead. (Certain)
+- **Install:** in HubSpot, Settings → Integrations → Connected Apps → Salesforce → Feature Discovery → Install HubSpot Embed. Then, in Salesforce, add the `HubSpot_Embed_[object]_V2` Visualforce page to every lead, contact, account and opportunity page layout that needs it — one layout at a time — or make those pages available for Lightning Experience and add them to Lightning record pages as Visualforce components. Installing it, and receiving its automatic updates, needs the Customize Application permission in Salesforce. (Certain)
+- **Each viewer needs a HubSpot login.** A Salesforce user sees the window only if they are also a HubSpot user, logged in to HubSpot, with permission to view the record. List everyone in sales who reads Engagement History today and plan a HubSpot user for each. (Certain for the login requirement; Verify with the HubSpot account team which seat each user needs and what it costs)
+- **Not on mobile.** HubSpot Embed does not work in mobile apps or their in-app browsers, so anyone who reads engagement on the Salesforce mobile app loses that view. (Certain)
+- Accounts and opportunities show HubSpot data only when they sync to a HubSpot company or deal that is associated with a syncing contact. (Certain)
 
 ## 10. Salesforce campaigns and campaign members
 
@@ -135,5 +143,6 @@ Adjust once the discovery facts are known.
 | Company sync | On, after Salesforce de-duplication | Needed for deal associations and account-level reporting |
 | Deal sync | On, Salesforce → HubSpot reporting focus | Attribution reporting in HubSpot |
 | Activity sync to tasks | Form submissions and email clicks only | Task volume |
+| HubSpot Embed | On lead and contact layouts (accounts and opportunities if they sync); HubSpot users for the salespeople who need it | Replaces Engagement History; each viewer needs a HubSpot login |
 | Lifecycle automatic transitions | On | Moves stages forward from Salesforce events |
 | Owner | Salesforce assignment rules on first sync | Reuse existing routing |

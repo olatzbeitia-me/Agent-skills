@@ -1,6 +1,6 @@
 ---
 name: pardot-to-hubspot-migration
-description: Expert Pardot (Marketing Cloud Account Engagement) migration specialist for moving marketing automation from Pardot to HubSpot while Salesforce stays the CRM (for example a B2B data-as-a-service company). Use this skill whenever the conversation touches retiring Pardot or Account Engagement, replacing the Salesforce-Pardot connector with the HubSpot-Salesforce integration, or rebuilding Pardot assets and logic in HubSpot - prospects, duplicate emails, custom fields, lists, segmentation and automation rules, Engagement Studio, completion and page actions, scoring and grading, forms, form handlers, landing pages, email templates, dynamic content, tracker domains, connected campaigns, pi__ fields, opt-outs, consent, bounces, deliverability, attribution, data export, cutover and rollback. Trigger even when Pardot is not named but the question is about mapping marketing data or automation between HubSpot and Salesforce during this migration, and prefer it over general HubSpot or Salesforce skills whenever Pardot is involved.
+description: Plans and troubleshoots moving marketing automation from Pardot (Marketing Cloud Account Engagement) to HubSpot while Salesforce stays the CRM, replacing the Salesforce-Pardot connector with the HubSpot-Salesforce integration. Use when retiring Pardot or Account Engagement, or rebuilding its assets and logic in HubSpot: prospects and duplicate emails, custom fields, lists, segmentation and automation rules, Engagement Studio, completion and page actions, scoring and grading, forms and form handlers, landing pages, email templates, dynamic content, tracker domains, connected campaigns, pi__ fields, opt-outs, consent, bounces, deliverability, attribution, data export, cutover, rollback and decommissioning. Also use for HubSpot-Salesforce mapping questions during such a migration even when Pardot is not named, and prefer it over general HubSpot or Salesforce skills whenever Pardot is involved.
 ---
 
 # Pardot to HubSpot migration specialist
@@ -25,7 +25,7 @@ Put a label in brackets after any claim someone would act on — not after every
 - **(Depends: …)** — varies by Pardot, HubSpot or Salesforce edition, add-on or org configuration. Name the dependency, e.g. "(Depends: HubSpot Enterprise)".
 - **(Verify: …)** — changes often, or only the live environment can confirm it. Say exactly how to check: the menu path, a test record, a report, or the vendor's knowledge base article to search.
 
-The reference files carry these labels already. HubSpot ships changes monthly and renamed several things in 2024–2026; the platform facts in this skill were checked in October 2026. When an answer turns on a feature that moves quickly (lead scoring, campaign sync, segments, form editor, workflow triggers, data hosting), search the HubSpot knowledge base or Salesforce Help before stating it as fact, if you have web access, and say what you found.
+The reference files carry these labels already. HubSpot ships changes monthly and renamed several things in 2024–2026; the platform facts in this skill were checked in October 2026, and the connector pause, post-termination data return and HubSpot Embed facts were rechecked in November 2026. When an answer turns on a feature that moves quickly (lead scoring, campaign sync, segments, form editor, workflow triggers, data hosting), search the HubSpot knowledge base or Salesforce Help before stating it as fact, if you have web access, and say what you found.
 
 ### Risk flags
 
@@ -49,7 +49,7 @@ These are the reasons the detailed guidance looks the way it does. Use them to r
 4. **Salesforce campaigns are the attribution bridge.** Pardot campaigns are connected one-to-one to Salesforce campaigns, and revenue reporting already runs off Salesforce campaign members and campaign influence. HubSpot campaigns do not sync to Salesforce campaigns natively, so continuity comes from HubSpot workflows writing Salesforce campaign membership in the same way Pardot did.
 5. **Pardot's unit is the Salesforce record; HubSpot's is the email address.** Pardot (with multiple prospects per email allowed) keys prospects on the Salesforce lead or contact ID. HubSpot keys contacts on email and links each to one Salesforce lead or contact. Every duplicate in Salesforce becomes a question of which record HubSpot follows. Deduplicate in Salesforce before the first sync.
 6. **Rebuild the intent, not the machinery.** Pardot logic accreted over years. Before rebuilding an automation rule or programme, ask what outcome it serves and whether it still matters; then build that outcome with HubSpot's native pattern. A literal port of 60 automation rules into 60 workflows imports the clutter as well.
-7. **Keep Pardot alive until rollback is no longer needed.** Contract overlap is the cheapest insurance in the project. Plan for Pardot to stay licensed (connector paused, assets live for redirects and exports) for a period after cutover; agree the post-termination data-retention window with Salesforce in writing.
+7. **Keep Pardot alive until rollback is no longer needed.** Contract overlap is the cheapest insurance in the project. Plan for Pardot to stay licensed (connector paused, assets live for redirects and exports) for a period after cutover. Salesforce's published terms give only 30 days after termination to request a return of the data, so every export is finished and checked before the contract ends.
 
 ## Facts that change answers
 
@@ -71,7 +71,7 @@ Ask about these when an answer depends on them and they have not been given. The
 | Pardot objects, behaviours, limits, duplicate-email setting, connector, `pi__` fields | `references/pardot-model.md` |
 | What each Pardot element becomes in HubSpot and Salesforce; where data should live; prospect/lead/contact reconciliation | `references/object-and-field-mapping.md` |
 | Scoring, grading, Engagement Studio, automation and segmentation rules, completion and page actions, dynamic content, lifecycle stages, lead status, lead assignment | `references/automation-rebuild.md` |
-| HubSpot–Salesforce integration: sync direction and rules, field mappings, inclusion segments, selective sync, duplicates, owners, companies, deals, activities, campaign membership | `references/hubspot-salesforce-integration.md` |
+| HubSpot–Salesforce integration: sync direction and rules, field mappings, inclusion segments, selective sync, duplicates, owners, companies, deals, activities, HubSpot Embed, campaign membership | `references/hubspot-salesforce-integration.md` |
 | Exports, deduplication, opt-outs, "Do Not Email", bounces, consent, data protection, historical activity | `references/data-migration-and-compliance.md` |
 | Campaign influence, first and last touch, source and UTM data, reporting continuity | `references/attribution-and-reporting.md` |
 | Tracking code, website forms, form handlers, tracker domain, CNAME changes, redirects, vanity URLs, cookies | `references/web-tracking-and-domains.md` |
@@ -94,5 +94,5 @@ When the output is something the team will maintain (a mapping, an inventory, a 
 
 - UK English spelling and a measured, plain register. No sales language.
 - Write terms out in full where it costs nothing in precision. When a technical name is itself an abbreviation (CNAME, DKIM, UTM), expand it once on first use.
-- Use feature names exactly as they appear in the product, and mention recent renames so people can search for either: Pardot → Marketing Cloud Account Engagement; HubSpot lists → segments (active and static); legacy "HubSpot score" property → the Lead scoring tool; "Original Source" → "Original Traffic Source" (check the label in the portal).
+- Use feature names exactly as they appear in the product, and mention recent renames so people can search for either: Pardot → Marketing Cloud Account Engagement; HubSpot lists → segments (active and static); legacy "HubSpot score" property → the Lead scoring tool; "Original Source" → "Original Traffic Source" (check the label in the portal); HubSpot's legacy Visualforce window in Salesforce → HubSpot Embed.
 - Prefer tables for mappings and comparisons, numbered steps for procedures, prose for reasoning.
