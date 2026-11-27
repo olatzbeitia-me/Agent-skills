@@ -8,7 +8,7 @@ The aim is not a dossier on each competitor. It is to answer: where are competit
 |---|---|---|
 | **Google Ads Transparency Center** (adstransparency.google.com) | Ads by advertiser or domain across Search, YouTube, Display and Shopping; filter by region and format; when ads were last shown | Spend, targeting, performance |
 | **Meta Ad Library** (facebook.com/ads/library) | All currently active ads across Facebook, Instagram, Messenger and Audience Network; start dates; platforms; number of variants | Spend and targeting for ordinary commercial ads outside the EU; ads delivered in the EU carry extra reach and targeting detail under the Digital Services Act |
-| **LinkedIn Ad Library** (linkedin.com/ad-library) | Ads run on LinkedIn in roughly the past year, searchable by advertiser; formats and copy; EU-delivered ads show impression ranges and targeting parameters | Spend; full targeting for non-EU delivery |
+| **LinkedIn Ad Library** (linkedin.com/ad-library) | Ads that ran after 1 June 2023, each kept for 1 year after its last impression; searchable by advertiser, payer, keyword, country and date range; preview, format, advertiser and payer. Ads targeted to the EU also show impressions, targeting and the dates they ran | Spend; impressions, targeting and run dates for ads not targeted to the EU; previews and names for restricted ads |
 | **TikTok Commercial Content Library** and **TikTok Creative Center (Top Ads)** | EU-delivered ads (library); top-performing ads by region and industry, including the UK (Creative Center) | Spend; full coverage of every advertiser |
 | **Microsoft, Pinterest and X ad repositories** | EU-delivered ads under the Digital Services Act | UK-only campaigns |
 | **The company's own Auction Insights** (Google Ads, Microsoft Advertising) | Which competitors appear in the same search auctions, impression share, overlap rate, outranking share, top-of-page rate. The best observed evidence of search competition | Anything outside the company's own auctions |
@@ -60,7 +60,7 @@ Semrush, SpyFu and Similarweb (search keywords and traffic estimates), Adthena (
    - Messaging angles: price, speed, trust or regulation, product breadth, integrations, service, customer proof, sustainability, local presence
    - Formats: video length and style, static, carousel, document, thought leader posts, creator content
    - Offers and calls to action: free trial, demo, calculator, guide, discount, event
-   - Funnel emphasis: demand capture (search, retargeting) versus demand creation (video, connected TV, creators)
+   - Funnel emphasis: activation that captures demand (search, retargeting, lead forms) versus brand-building that creates it (video, connected TV, creators); see "Two roles" in `market-research.md`
    - Markets and languages
    - Notable absences
 4. **Turn findings into openings.** For each, state what this company could do and why it plausibly works:
