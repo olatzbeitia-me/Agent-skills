@@ -8,6 +8,8 @@ pipeline value) and a quarter plan (target, planned leads for the months still t
   * the size of any gap to target;
   * what each lever would have to do, on its own, to close that gap, checked against the best month
     actually achieved recently, so the answer separates realistic levers from wishful ones;
+  * if the plan gives the typical days from lead to opportunity, a timing check on the lead volume
+    lever: extra leads only help if they have time to become opportunities before the quarter ends;
   * warning signs where a conversion rate is falling.
 
 Standard library only. Run:  python3 forecast.py --history funnel.csv --plan plan.json --out report
@@ -15,9 +17,11 @@ Standard library only. Run:  python3 forecast.py --history funnel.csv --plan pla
 from __future__ import annotations
 
 import argparse
+import calendar
 import csv
 import json
 import statistics
+from datetime import date, timedelta
 from pathlib import Path
 
 STAGES = ["leads", "mqls", "sqls", "opportunities"]
@@ -73,6 +77,15 @@ def load_plan(path: Path) -> dict:
             raise SystemExit(f"{path}: missing '{key}'")
     plan.setdefault("lookback_months", 6)
     plan.setdefault("currency", "£")
+    days = plan.get("lead_to_opportunity_days")
+    if days is not None:
+        if isinstance(days, bool) or not isinstance(days, (int, float)) or days < 0:
+            raise SystemExit(f"{path}: 'lead_to_opportunity_days' must be a number of days, 0 or more")
+    if plan.get("as_of") is not None:
+        try:
+            date.fromisoformat(plan["as_of"])
+        except (TypeError, ValueError):
+            raise SystemExit(f"{path}: 'as_of' must be a date written as YYYY-MM-DD")
     return plan
 
 
@@ -103,6 +116,50 @@ def project(leads: float, rates: dict) -> dict:
         out[b] = out[a] * rates[key]
     out["pipeline_value"] = out["opportunities"] * rates[VALUE_KEY]
     return out
+
+
+def month_bounds(month: str) -> tuple[date, date]:
+    """First and last day of a 'YYYY-MM' month."""
+    year, mon = (int(part) for part in month.split("-"))
+    return date(year, mon, 1), date(year, mon, calendar.monthrange(year, mon)[1])
+
+
+def lead_timing(plan: dict, remaining: list[str], extra_leads: float) -> dict | None:
+    """Can extra leads still become opportunities before the quarter ends?
+
+    Uses the median days from lead to opportunity as a cut-off: an extra lead counts only if it arrives
+    at least that many days before the last day of the quarter. Extra leads can start arriving on the
+    first day of the months still to come, or on 'as_of' if that is later. Returns None when the plan
+    gives no lead_to_opportunity_days.
+    """
+    days = plan.get("lead_to_opportunity_days")
+    if days is None or not remaining:
+        return None
+    quarter_end = month_bounds(plan["quarter_months"][-1])[1]
+    cutoff = quarter_end - timedelta(days=int(round(days)))
+    start = month_bounds(remaining[0])[0]
+    if plan.get("as_of"):
+        start = max(start, date.fromisoformat(plan["as_of"]))
+    usable = {}
+    for m in remaining:
+        first, last = month_bounds(m)
+        window_first, window_last = max(first, start), min(last, cutoff)
+        usable[m] = max(0, (window_last - window_first).days + 1)
+    usable_days = sum(usable.values())
+    timing = {"lead_to_opportunity_days": days, "start": start.isoformat(), "cutoff": cutoff.isoformat(),
+              "quarter_end": quarter_end.isoformat(), "usable_days": usable_days, "extra_leads": extra_leads,
+              "too_late": usable_days == 0, "peak_monthly_pace": None, "peak_month": None}
+    if usable_days:
+        per_day = extra_leads / usable_days
+        for m in remaining:
+            if usable[m]:
+                first, last = month_bounds(m)
+                # the planned month plus the extra daily rate, expressed as a full month's pace so it can be
+                # compared with the best month in the window
+                pace = float(plan["planned_leads"][m]) + per_day * ((last - first).days + 1)
+                if timing["peak_monthly_pace"] is None or pace > timing["peak_monthly_pace"]:
+                    timing["peak_monthly_pace"], timing["peak_month"] = pace, m
+    return timing
 
 
 def forecast(history: list[dict], plan: dict) -> dict:
@@ -149,9 +206,13 @@ def forecast(history: list[dict], plan: dict) -> dict:
                 per_month_needed = needed / len(remaining) if remaining else needed
                 best = best_month_leads
                 achievable = per_month_needed <= best
+                # if conversion time is known, only extra leads arriving early enough can count this quarter
+                timing = lead_timing(plan, remaining, needed - planned)
+                if timing is not None:
+                    achievable = (not timing["too_late"]) and timing["peak_monthly_pace"] <= best
                 levers.append({"lever": key, "label": LEVER_LABELS[key], "current": current, "needed": needed,
                                "needed_per_month": per_month_needed, "best_recent": best,
-                               "change": needed_multiplier - 1, "achievable": achievable})
+                               "change": needed_multiplier - 1, "achievable": achievable, "timing": timing})
             else:
                 current = base["rates"][key]
                 needed = current * needed_multiplier
@@ -183,6 +244,38 @@ def forecast(history: list[dict], plan: dict) -> dict:
 
 def money(x: float, cur: str) -> str:
     return f"{cur}{x:,.0f}"
+
+
+def long_date(iso: str) -> str:
+    d = date.fromisoformat(iso)
+    return f"{d.day} {d:%B %Y}"
+
+
+def month_name(month: str) -> str:
+    return f"{date.fromisoformat(month + '-01'):%B %Y}"
+
+
+def verdict(lever: dict) -> str:
+    timing = lever.get("timing")
+    if timing and timing["too_late"]:
+        return "Too late for this quarter"
+    return "Realistic" if lever["achievable"] else "Beyond recent performance"
+
+
+def timing_note(lv: dict) -> str:
+    t = lv["timing"]
+    days = f"{t['lead_to_opportunity_days']:g}"
+    if t["too_late"]:
+        return (f"Timing: leads take a median of {days} days to become opportunities, so a lead would have to "
+                f"arrive by {long_date(t['cutoff'])} to count this quarter. That date is before "
+                f"{long_date(t['start'])}, so extra leads cannot close this quarter's gap. Plan them for next "
+                "quarter and look at the conversion rates instead.")
+    return (f"Timing: leads take a median of {days} days to become opportunities, so the extra "
+            f"{t['extra_leads']:,.0f} leads have to arrive between {long_date(t['start'])} and "
+            f"{long_date(t['cutoff'])} ({t['usable_days']} days) to count this quarter. That means running "
+            f"{month_name(t['peak_month'])} at a pace of {t['peak_monthly_pace']:,.0f} "
+            f"leads a month, against a best recent month of {lv['best_recent']:,.0f}. The median is used as a "
+            "cut-off, so treat this as a guide to timing rather than an exact count.")
 
 
 def fmt_value(key: str, x: float, cur: str) -> str:
@@ -252,14 +345,23 @@ def render_markdown(r: dict) -> str:
             key = lv["lever"]
             if key == "leads":
                 now = f"{lv['current']:,.0f} total"
-                needed = f"{lv['needed']:,.0f} total ({lv['needed_per_month']:,.0f} a month)"
+                t = lv.get("timing")
+                if t and t["too_late"]:
+                    pace = f"would need to arrive by {long_date(t['cutoff'])}"
+                elif t:
+                    pace = f"a pace of {t['peak_monthly_pace']:,.0f} a month until {long_date(t['cutoff'])}"
+                else:
+                    pace = f"{lv['needed_per_month']:,.0f} a month"
+                needed = f"{lv['needed']:,.0f} total ({pace})"
                 best = f"{lv['best_recent']:,.0f} in a month"
             else:
                 now, needed, best = (fmt_value(key, lv[k], cur) for k in ("current", "needed", "best_recent"))
-            verdict = "Realistic" if lv["achievable"] else "Beyond recent performance"
-            lines.append(f"| {lv['label']} | {now} | {needed} (+{lv['change']:.0%}) | {best} | {verdict} |")
+            lines.append(f"| {lv['label']} | {now} | {needed} (+{lv['change']:.0%}) | {best} | {verdict(lv)} |")
         realistic = [lv for lv in r["levers"] if lv["achievable"]]
         lines.append("")
+        lead_lever = next((lv for lv in r["levers"] if lv["lever"] == "leads"), None)
+        if lead_lever and lead_lever.get("timing"):
+            lines += [timing_note(lead_lever), ""]
         if realistic:
             lines.append(f"Start with: **{realistic[0]['label'].lower()}**. It needs the smallest stretch that "
                          "recent months show is possible. Combining two smaller moves is usually easier than one big one.")
@@ -283,7 +385,11 @@ def render_markdown(r: dict) -> str:
               "- Leads created in the last weeks of the quarter often turn into opportunities after it ends, so the "
               "final month's contribution is optimistic.",
               "- The forecast is only as good as the stage definitions behind the numbers. If the definition of a "
-              "qualified lead changed during the window, the rates are not comparable.", ""]
+              "qualified lead changed during the window, the rates are not comparable."]
+    if r["levers"] and not any(lv.get("timing") for lv in r["levers"]):
+        lines.append("- The lead volume lever assumes extra leads have time to become opportunities before the "
+                     "quarter ends. Add `lead_to_opportunity_days` to the plan to check this.")
+    lines.append("")
     return "\n".join(lines)
 
 

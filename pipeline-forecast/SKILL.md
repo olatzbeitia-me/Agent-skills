@@ -25,10 +25,17 @@ month,leads,mqls,sqls,opportunities,pipeline_value
 ```json
 {"quarter_label": "Q4 2026", "quarter_months": ["2026-10","2026-11","2026-12"],
  "pipeline_target": 5600000, "planned_leads": {"2026-11": 2200, "2026-12": 1700},
+ "lead_to_opportunity_days": 45, "as_of": "2026-11-01",
  "lookback_months": 6, "currency": "£"}
 ```
 
-If the user only has a CRM export, help them shape it into these columns first. Confirm the stage definitions: if what counts as a marketing qualified lead changed during the window, say the rates are not comparable before forecasting.
+`lead_to_opportunity_days` is optional but ask for it whenever there is a gap: it is the median number of days from a lead being created to its opportunity being opened, across recent converted leads. Without it, the script cannot tell whether extra leads would arrive in time to count. In HubSpot, take the difference between the "Date entered" properties of the two lifecycle stages; in Salesforce, the gap between a converted lead's created date and its converted date. `as_of` (optional) is today's date if the quarter is already under way; it defaults to the first day of the months still to come.
+
+If the user only has a CRM export, help them shape it into these columns first. Then confirm what the history counts before forecasting:
+
+- **Stage definitions.** If what counts as a marketing qualified lead changed during the window, say the rates are not comparable.
+- **One kind of opportunity.** New business, expansion and renewal opportunities convert at different rates and speeds. If the history mixes them, forecast each separately or limit it to new business.
+- **Buying groups.** If several people from one buying group each count as a lead, lead-based rates look low, and extra leads from accounts already in the pipeline add few new opportunities. Say so when recommending more volume.
 
 ## 2. Run it
 
@@ -46,11 +53,13 @@ Then the diagnosis. Use the **warning signs** first: a falling conversion rate m
 
 Then the recommendation. Start from the levers marked **Realistic**. If none closes the gap alone, propose a combination of smaller moves and show the arithmetic. If nothing realistic closes it, say so and recommend resetting the target with this evidence, rather than promising a stretch that recent months do not support.
 
+Never recommend more leads without the timing check. If the report has a **Timing** line, use its cut-off date and pace. If the lever says **Too late for this quarter**, move the extra volume into next quarter's plan. If the plan had no `lead_to_opportunity_days`, ask for it before recommending more leads in the second half of a quarter.
+
 End with what to watch weekly until quarter end (normally the falling rate and lead volume against plan).
 
 ## Rules
 
 - Never fabricate history or targets. Every number in the answer must come from the user's data or the script output.
 - Keep the low scenario in perspective: it puts every rate at a weak month simultaneously, so it is a floor, not a forecast.
-- Name the model's limits when they apply (same-month ratios, late-quarter leads converting next quarter).
+- Name the model's limits when they apply (same-month ratios, late-quarter leads converting next quarter, the timing check using the median as a cut-off).
 - Plain language: say "marketing qualified lead", not acronyms, unless the user uses them.

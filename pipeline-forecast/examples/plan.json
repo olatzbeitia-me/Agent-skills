@@ -3,6 +3,7 @@
   "quarter_months": ["2026-10", "2026-11", "2026-12"],
   "pipeline_target": 5600000,
   "planned_leads": {"2026-11": 2200, "2026-12": 1700},
+  "lead_to_opportunity_days": 45,
   "lookback_months": 6,
   "currency": "£"
 }
