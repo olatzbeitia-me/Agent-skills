@@ -70,6 +70,61 @@ class ForecastTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             fc.forecast(steady_history(), fc.load_plan(self._write(plan)))
 
+    def _timing_case(self, **extra):
+        # one strong month (1,500 leads, same rates) makes +20% leads look realistic on volume alone
+        hist = steady_history()
+        hist[2].update({"leads": 1500, "mqls": 450, "sqls": 180, "opportunities": 90, "pipeline_value": 900_000.0})
+        plan = {"quarter_label": "Q3", "quarter_months": ["2026-07", "2026-08", "2026-09"],
+                "pipeline_target": 2_160_000, "planned_leads": {"2026-07": 1000, "2026-08": 1000, "2026-09": 1000},
+                "lookback_months": 6, "currency": "£", **extra}
+        r = fc.forecast(hist, plan)
+        return r, next(lv for lv in r["levers"] if lv["lever"] == "leads")
+
+    def test_lead_lever_without_timing_is_unchanged(self):
+        r, lead = self._timing_case()
+        self.assertIsNone(lead["timing"])
+        self.assertAlmostEqual(lead["needed_per_month"], 1200)
+        self.assertTrue(lead["achievable"])  # 1,200 a month is below the best month of 1,500
+        self.assertIn("Add `lead_to_opportunity_days`", fc.render_markdown(r))
+
+    def test_lead_lever_timing_needs_a_faster_pace(self):
+        # quarter ends 30 September; 61 days earlier is 31 July, so the 600 extra leads must all arrive in July
+        r, lead = self._timing_case(lead_to_opportunity_days=61)
+        t = lead["timing"]
+        self.assertEqual(t["cutoff"], "2026-07-31")
+        self.assertEqual(t["usable_days"], 31)
+        self.assertAlmostEqual(t["extra_leads"], 600)
+        self.assertEqual(t["peak_month"], "2026-07")
+        self.assertAlmostEqual(t["peak_monthly_pace"], 1600)
+        self.assertFalse(lead["achievable"])  # 1,600 a month is above the best month of 1,500
+        report = fc.render_markdown(r)
+        self.assertIn("a pace of 1,600 a month until 31 July 2026", report)
+        self.assertIn("Beyond recent performance", report)
+
+    def test_lead_lever_timing_can_still_be_realistic(self):
+        # 31 days: cut-off 30 August, 61 usable days, so about 10 extra leads a day
+        _, lead = self._timing_case(lead_to_opportunity_days=31)
+        t = lead["timing"]
+        self.assertEqual(t["cutoff"], "2026-08-30")
+        self.assertEqual(t["usable_days"], 61)
+        self.assertAlmostEqual(t["peak_monthly_pace"], 1000 + 600 / 61 * 31)
+        self.assertTrue(lead["achievable"])
+
+    def test_lead_lever_too_late(self):
+        r, lead = self._timing_case(lead_to_opportunity_days=45, as_of="2026-08-20")
+        # cut-off 16 August is before the as-of date, so no extra lead can convert in time
+        self.assertTrue(lead["timing"]["too_late"])
+        self.assertFalse(lead["achievable"])
+        self.assertIn("Too late for this quarter", fc.render_markdown(r))
+
+    def test_invalid_timing_fields_are_errors(self):
+        base = {"quarter_label": "Q3", "quarter_months": ["2026-07"], "pipeline_target": 1,
+                "planned_leads": {"2026-07": 1000}}
+        for bad in ({"lead_to_opportunity_days": -5}, {"lead_to_opportunity_days": "45"},
+                    {"as_of": "20/08/2026"}):
+            with self.assertRaises(SystemExit):
+                fc.load_plan(self._write({**base, **bad}))
+
     def test_example_runs(self):
         r = fc.forecast(fc.load_history(EXAMPLES / "funnel.csv"), fc.load_plan(EXAMPLES / "plan.json"))
         self.assertGreater(r["gap_to_target"], 0)

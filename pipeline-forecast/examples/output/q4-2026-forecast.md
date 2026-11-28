@@ -34,13 +34,15 @@ Each row is one lever on its own, with everything else at the base rate. "Realis
 
 | Lever | Now | Needed | Best recent month | Verdict |
 |---|---:|---:|---:|---|
-| More leads in the remaining months | 3,900 total | 4,496 total (2,248 a month) (+15%) | 2,300 in a month | Realistic |
+| More leads in the remaining months | 3,900 total | 4,496 total (a pace of 3,318 a month until 16 November 2026) (+15%) | 2,300 in a month | Beyond recent performance |
 | Better lead to marketing qualified lead rate | 34.0% | 39.2% (+15%) | 35.0% | Beyond recent performance |
 | Better marketing qualified to sales qualified rate | 36.5% | 42.1% (+15%) | 40.1% | Beyond recent performance |
 | Better sales qualified lead to opportunity rate | 36.9% | 42.5% (+15%) | 37.2% | Beyond recent performance |
 | Higher average opportunity value | £19,250 | £22,192 (+15%) | £20,000 | Beyond recent performance |
 
-Start with: **more leads in the remaining months**. It needs the smallest stretch that recent months show is possible. Combining two smaller moves is usually easier than one big one.
+Timing: leads take a median of 45 days to become opportunities, so the extra 596 leads have to arrive between 1 November 2026 and 16 November 2026 (16 days) to count this quarter. That means running November 2026 at a pace of 3,318 leads a month, against a best recent month of 2,300. The median is used as a cut-off, so treat this as a guide to timing rather than an exact count.
+
+No single lever closes the gap within recent performance. Either combine levers, or reset the target with the evidence above.
 
 ## Warning signs
 

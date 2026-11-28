@@ -85,7 +85,18 @@
       "needed_per_month": 2248.023522109246,
       "best_recent": 2300,
       "change": 0.152832575440639,
-      "achievable": true
+      "achievable": false,
+      "timing": {
+        "lead_to_opportunity_days": 45,
+        "start": "2026-11-01",
+        "cutoff": "2026-11-16",
+        "quarter_end": "2026-12-31",
+        "usable_days": 16,
+        "extra_leads": 596.0470442184924,
+        "too_late": false,
+        "peak_monthly_pace": 3317.588207909673,
+        "peak_month": "2026-11"
+      }
     },
     {
       "lever": "lead_to_mql",
